@@ -54,25 +54,31 @@ def print_table_row(mph):
     print '{0:.1f} & {1} & {2} & {3} & {4} & {5} \\\\'.format(mph, pace1m, pace5k, pace10k, pacehalf, pacefull)
     
 def print_table():
-    mph_table = [5 + i/5 for i in range(31)]
+    mph_table = [5 + i/5 for i in range(29)]
     for mph in mph_table:
         print_table_row(mph)
     
     
 def print_latex_header():
     print '''
-\\documentclass[12pt]{article}
+\\documentclass[11pt]{article}
 \\usepackage{amsmath}
 \\usepackage{fullpage}
+\\usepackage{booktabs}
 \\begin{document}
-\\begin{large}
+\\begin{Large}
 \\thispagestyle{empty}
+\\sffamily
+\\begin{center}
 \\begin{tabular}{rrrrrr}
-mph & 1mi & 5k & 10k & half & full \\\\'''
+\\toprule
+\\multicolumn{1}{c}{mph} & \\multicolumn{1}{c}{1mi} & \\multicolumn{1}{c}{5k} & \\multicolumn{1}{c}{10k} & \\multicolumn{1}{c}{half} & \\multicolumn{1}{c}{full} \\\\ \\midrule'''
 
 def print_latex_footer():
-    print '''\\end{tabular}
-\\end{large}
+    print '''\\bottomrule
+\\end{tabular}
+\\end{center}
+\\end{Large}
 \\end{document}'''
     
 if __name__ == "__main__":
