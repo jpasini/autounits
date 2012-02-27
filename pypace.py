@@ -1,14 +1,39 @@
 from __future__ import division
 
 class Distance(object):
-    def __init__(self):
+    def __init__(self, distance_string = None):
         self._meters = None
         # Conversion constants
         self._meters_in = {
             'mi': 1609.344, 
             'km': 1000, 
             'marathon': 42194.988 }
+        if distance_string is not None:
+            self._meters = self.distance_from_string(distance_string)
         
+    def distance_from_string(self, distance_string):
+        '''Define a grammar to get the distance from the given string.
+        Examples: .3m, 10mi, 0.7marathons, 5 m, 2 km, 6 Km, 8 miles, etc.
+        '''
+        from pyparsing import CaselessLiteral, replaceWith, Or, nums, Word
+        
+        def makeLit(s, val):
+            ret = CaselessLiteral(s).setName(s)
+            return ret.setParseAction(replaceWith(val))
+            
+        unitDefinitions = [
+            ('m', 1),
+            ('km', 1000),
+            ('mi', 1609.344),
+            ('marathon', 42194.988),
+            ]        
+        units = Or( [ makeLit(s,v) for s,v in unitDefinitions ] )
+        number = Word(nums + '.')
+        dimension = number + units
+        a = dimension.parseString(distance_string)
+        return float(a[0])*a[1]
+        
+
     @property
     def m(self):
         '''Distance in meters.'''
@@ -97,9 +122,8 @@ class Speed(object):
     def __init__(self):
         self._mps = None # store internally in meters/sec
         # Conversions
-        d = Distance()
+        d = Distance('1 mi')
         t = Time()
-        d.mi = 1
         t.hr = 1
         self._mph_to_mps = d.m/t.s
         
@@ -131,17 +155,13 @@ def print_table_row(mph):
     '''Print mph and pace for 1 mile, 5k, 10k, half, and full marathon.'''
     s = Speed()
     s.mph = mph
-    d = Distance()
-    d.mi = 1
-    pace1m = s.pace(d).str
-    d.km = 5
-    pace5k = s.pace(d).str
-    d.km = 10
-    pace10k = s.pace(d).str
-    d.marathon = 0.5
-    pacehalf = s.pace(d).str
-    d.marathon = 1
-    pacefull = s.pace(d).str
+    distances = ['1mi','5km','10km','0.5marathon','1marathon']
+    d = [Distance(x) for x in distances]
+    pace1m = s.pace(d[0]).str
+    pace5k = s.pace(d[1]).str
+    pace10k = s.pace(d[2]).str
+    pacehalf = s.pace(d[3]).str
+    pacefull = s.pace(d[4]).str
     print '{0:.1f} & {1} & {2} & {3} & {4} & {5} \\\\'.format(mph, pace1m, pace5k, pace10k, pacehalf, pacefull)
     
 def print_table():
