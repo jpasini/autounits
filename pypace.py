@@ -44,7 +44,56 @@ class Distance(object):
     @marathon.setter
     def marathon(self, value):
         self._meters = value*self._meters_in['marathon']
+
+class Time(object):
+    def __init__(self):
+        self._secs = None
+        # Conversion constants
+        self._secs_in = {
+            'min': 60, 
+            'hr': 3600 }
         
+    @property
+    def s(self):
+        '''Time in seconds.'''
+        return self._secs
+        
+    @s.setter
+    def s(self, value):
+        self._secs = value
+        
+    @property
+    def min(self):
+        '''Time in minutes.'''
+        return self._secs/self._secs_in['min']
+        
+    @min.setter
+    def min(self, value):
+        self._secs = value*self._secs_in['min']
+        
+    @property
+    def hr(self):
+        '''Time in hours.'''
+        return self._secs/self._secs_in['hr']
+               
+    @hr.setter
+    def hr(self, value):
+        self._secs = value*self._secs_in['hr']
+        
+    @property
+    def str(self):
+        secs = self._secs
+        hours = int(secs/self._secs_in['hr'])
+        secs = secs - hours*self._secs_in['hr']
+        mins = int(secs/self._secs_in['min'])
+        secs = int(secs - mins*self._secs_in['min'])
+        result = ""
+        if hours > 0:
+            result = result + str(hours) + ":"
+        result = result + '{0:02d}:{1:02d}'.format(mins,secs)
+        return result
+        
+       
 
 def secs_for_distance(distance, meters_per_sec):
     '''Seconds required to cover distance given speed.'''
