@@ -121,6 +121,12 @@ class Speed(object):
     def mph(self, value):
         self._mps = value*self._mph_to_mps
         
+    def pace(self, distance):
+        '''Return time to cover given distance.'''
+        t = Time()
+        t.s = distance.m/self.mps
+        return t
+        
 def secs_for_distance(distance, meters_per_sec):
     '''Seconds required to cover distance given speed.'''
     return distance/meters_per_sec
