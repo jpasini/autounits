@@ -127,50 +127,6 @@ class Speed(object):
         t.s = distance.m/self.mps
         return t
         
-def secs_for_distance(distance, meters_per_sec):
-    '''Seconds required to cover distance given speed.'''
-    return distance/meters_per_sec
-    
-def miles_to_meters(miles):
-    return miles*1609.344
-
-def marathon_to_meters(marathons):
-    return marathons*42194.988
-
-def hours_to_seconds(hours):
-    return hours*3600
-    
-def mph_to_mps(mph):
-    '''Miles/hour to meters/sec'''
-    return mph*miles_to_meters(1)/hours_to_seconds(1)
-
-def one_mile_pace(mph):
-    '''Time per mile.'''
-    return secs_for_distance(miles_to_meters(1), mph_to_mps(mph))
-    
-def secs_for_5k(mph):
-    return secs_for_distance(5000, mph_to_mps(mph))
-
-def secs_for_10k(mph):
-    return secs_for_distance(10000, mph_to_mps(mph))
-
-def secs_for_half_marathon(mph):
-    return secs_for_distance(marathon_to_meters(1/2), mph_to_mps(mph))
-
-def secs_for_marathon(mph):
-    return secs_for_distance(marathon_to_meters(1), mph_to_mps(mph))
-
-def secs_to_string(secs):
-    hours = int(secs/3600)
-    secs = secs - hours*3600
-    mins = int(secs/60)
-    secs = int(secs - mins*60)
-    result = ""
-    if hours > 0:
-        result = result + str(hours) + ":"
-    result = result + '{0:02d}:{1:02d}'.format(mins,secs)
-    return result
-
 def print_table_row(mph):
     '''Print mph and pace for 1 mile, 5k, 10k, half, and full marathon.'''
     s = Speed()
