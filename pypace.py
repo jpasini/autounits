@@ -173,11 +173,19 @@ def secs_to_string(secs):
 
 def print_table_row(mph):
     '''Print mph and pace for 1 mile, 5k, 10k, half, and full marathon.'''
-    pace1m = secs_to_string(one_mile_pace(mph))
-    pace5k = secs_to_string(secs_for_5k(mph))
-    pace10k = secs_to_string(secs_for_10k(mph))
-    pacehalf = secs_to_string(secs_for_half_marathon(mph))
-    pacefull = secs_to_string(secs_for_marathon(mph))
+    s = Speed()
+    s.mph = mph
+    d = Distance()
+    d.mi = 1
+    pace1m = s.pace(d).str
+    d.km = 5
+    pace5k = s.pace(d).str
+    d.km = 10
+    pace10k = s.pace(d).str
+    d.marathon = 0.5
+    pacehalf = s.pace(d).str
+    d.marathon = 1
+    pacefull = s.pace(d).str
     print '{0:.1f} & {1} & {2} & {3} & {4} & {5} \\\\'.format(mph, pace1m, pace5k, pace10k, pacehalf, pacefull)
     
 def print_table():
