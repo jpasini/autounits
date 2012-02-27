@@ -92,9 +92,35 @@ class Time(object):
             result = result + str(hours) + ":"
         result = result + '{0:02d}:{1:02d}'.format(mins,secs)
         return result
-        
-       
 
+class Speed(object):
+    def __init__(self):
+        self._mps = None # store internally in meters/sec
+        # Conversions
+        d = Distance()
+        t = Time()
+        d.mi = 1
+        t.hr = 1
+        self._mph_to_mps = d.m/t.s
+        
+    @property
+    def mps(self):
+        '''Speed in meters/second.'''
+        return self._mps
+        
+    @mps.setter
+    def mps(self, value):
+        self._mps = value
+        
+    @property
+    def mph(self):
+        '''Speed in miles per hour.'''
+        return self._mps/self._mph_to_mps
+        
+    @mph.setter
+    def mph(self, value):
+        self._mps = value*self._mph_to_mps
+        
 def secs_for_distance(distance, meters_per_sec):
     '''Seconds required to cover distance given speed.'''
     return distance/meters_per_sec
