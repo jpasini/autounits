@@ -1,5 +1,51 @@
 from __future__ import division
 
+class Distance(object):
+    def __init__(self):
+        self._meters = None
+        # Conversion constants
+        self._meters_in = {
+            'mi': 1609.344, 
+            'km': 1000, 
+            'marathon': 42194.988 }
+        
+    @property
+    def m(self):
+        '''Distance in meters.'''
+        return self._meters
+        
+    @m.setter
+    def m(self, value):
+        self._meters = value
+        
+    @property
+    def mi(self):
+        '''Distance in miles.'''
+        return self._meters/self._meters_in['mi']
+        
+    @mi.setter
+    def mi(self, value):
+        self._meters = value*self._meters_in['mi']
+        
+    @property
+    def km(self):
+        '''Distance in km.'''
+        return self._meters/self._meters_in['km']
+        
+    @km.setter
+    def km(self, value):
+        self._meters = value*self._meters_in['km']
+        
+    @property
+    def marathon(self):
+        '''Distance in marathons.'''
+        return self._meters/self._meters_in['marathon']
+        
+    @marathon.setter
+    def marathon(self, value):
+        self._meters = value*self._meters_in['marathon']
+        
+
 def secs_for_distance(distance, meters_per_sec):
     '''Seconds required to cover distance given speed.'''
     return distance/meters_per_sec
