@@ -157,12 +157,8 @@ def print_table_row(mph):
     s.mph = mph
     distances = ['1mi','5km','10km','0.5marathon','1marathon']
     d = [Distance(x) for x in distances]
-    pace1m = s.pace(d[0]).str
-    pace5k = s.pace(d[1]).str
-    pace10k = s.pace(d[2]).str
-    pacehalf = s.pace(d[3]).str
-    pacefull = s.pace(d[4]).str
-    print '{0:.1f} & {1} & {2} & {3} & {4} & {5} \\\\'.format(mph, pace1m, pace5k, pace10k, pacehalf, pacefull)
+    paces = [s.pace(x).str for x in d]
+    print '{0:.1f} & {1} & {2} & {3} & {4} & {5} \\\\'.format(mph, *paces)
     
 def print_table():
     mph_table = [5 + i/5 for i in range(29)]
