@@ -5,32 +5,43 @@ Library of physical quantities, with automatic unit conversion.
 
 from __future__ import division
 
-class Distance(object):
-    def __init__(self, distance_string = None):
-        self._meters = None
-        # Conversion constants
-        self._meters_in = {'m': 1, 'mi': 1609.344, 'km': 1000, 'marathon': 42194.988 }
-        if distance_string is not None:
-            self._meters = self.distance_from_string(distance_string)
+
+class PhysicalQuantityStringParser(object):
+    """Object that parses a string representing an amount with units."""
+    def __init__(self, units_dictionary):
+        """Define a parser based on the given units_dictionary.
+        For example, for distances you would use:
         
-    def distance_from_string(self, distance_string):
-        '''Define a grammar to get the distance from the given string.
-        Examples: .3m, 10mi, 0.7marathon, 5 m, 2 km, 6 Km, 8 mi, etc.
-        '''
+        units_dictionary = {'m': 1, 'mi': 1609.344}
+        
+        Note that the unit associated with "1" would be the basic unit.
+        """
         from pyparsing import CaselessLiteral, replaceWith, Or, nums, Word
         
         def makeLit(s, val):
             ret = CaselessLiteral(s).setName(s)
             return ret.setParseAction(replaceWith(val))
             
-        unitDefinitions = [(k,v) for k,v in self._meters_in.iteritems()]
+        unitDefinitions = [(k,v) for k,v in units_dictionary.iteritems()]
         units = Or( [ makeLit(s,v) for s,v in unitDefinitions ] )
         number = Word(nums + '.')
-        dimension = number + units
-        a = dimension.parseString(distance_string)
+        self._dimension = number + units
+        
+    def __call__(self, quantity_string):
+        """Parse the given string."""
+        a = self._dimension.parseString(quantity_string)
         return float(a[0])*a[1]
         
 
+class Distance(object):
+    def __init__(self, distance_string = None):
+        self._meters = None
+        # Conversion constants
+        self._meters_in = {'m': 1, 'mi': 1609.344, 'km': 1000, 'marathon': 42194.988 }
+        self._parser = PhysicalQuantityStringParser(self._meters_in)
+        if distance_string is not None:
+            self._meters = self._parser(distance_string)
+        
     @property
     def m(self):
         '''Distance in meters.'''
@@ -73,25 +84,9 @@ class Time(object):
         self._secs = None
         # Conversion constants
         self._secs_in = {'s': 1, 'min': 60, 'hr': 3600 }
+        self._parser = PhysicalQuantityStringParser(self._secs_in)
         if time_string is not None:
-            self._secs = self.time_from_string(time_string)
-        
-    def time_from_string(self, time_string):
-        '''Define a grammar to get the time from the given string.
-        Examples: .3s, 10min, 0.7hr, 5 Min, 2 Hr, etc.
-        '''
-        from pyparsing import CaselessLiteral, replaceWith, Or, nums, Word
-        
-        def makeLit(s, val):
-            ret = CaselessLiteral(s).setName(s)
-            return ret.setParseAction(replaceWith(val))
-            
-        unitDefinitions = [(k,v) for k,v in self._secs_in.iteritems()]
-        units = Or( [ makeLit(s,v) for s,v in unitDefinitions ] )
-        number = Word(nums + '.')
-        dimension = number + units
-        a = dimension.parseString(time_string)
-        return float(a[0])*a[1]
+            self._secs = self._parser(time_string)
         
     @property
     def s(self):
@@ -143,25 +138,9 @@ class Speed(object):
 
         # Conversion constants
         self._mps_in = {'mps': 1, 'mph': d.m/t.s }
+        self._parser = PhysicalQuantityStringParser(self._mps_in)
         if speed_string is not None:
-            self._mps = self.speed_from_string(speed_string)
-        
-    def speed_from_string(self, speed_string):
-        '''Define a grammar to get the speed from the given string.
-        Examples: .3mps, 10mph, 0.7 mps, 5 MPH, etc.
-        '''
-        from pyparsing import CaselessLiteral, replaceWith, Or, nums, Word
-        
-        def makeLit(s, val):
-            ret = CaselessLiteral(s).setName(s)
-            return ret.setParseAction(replaceWith(val))
-            
-        unitDefinitions = [(k,v) for k,v in self._mps_in.iteritems()]
-        units = Or( [ makeLit(s,v) for s,v in unitDefinitions ] )
-        number = Word(nums + '.')
-        dimension = number + units
-        a = dimension.parseString(speed_string)
-        return float(a[0])*a[1]
+            self._mps = self._parser(speed_string)
         
     @property
     def mps(self):

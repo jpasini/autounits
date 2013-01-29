@@ -1,7 +1,19 @@
 from __future__ import division
 
 import unittest
-from physical_quantities import Distance, Time, Speed
+from physical_quantities import Distance, Time, Speed, PhysicalQuantityStringParser
+
+class TestQuantityStringParser(unittest.TestCase):
+    """Tests for the string parser for physical quantities."""
+    
+    def test_simple_parser(self):
+        meters_in = {'m' : 1, 'km': 1000}
+        p = PhysicalQuantityStringParser(meters_in)
+        # The results are in meters because that was the basic unit.
+        self.assertEqual(p('1 m'), 1)
+        self.assertEqual(p('2Km'), 2000)
+        self.assertEqual(p('0.1 kM'), 100)
+
 
 class TestDistance(unittest.TestCase):
     """Tests for the Distance class."""
