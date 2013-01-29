@@ -1,6 +1,6 @@
 """
-physical_quantities.py: Library of physical quantities, with automatic
-unit conversion.
+physical_quantities.py:
+Library of physical quantities, with automatic unit conversion.
 """
 
 from __future__ import division
@@ -73,12 +73,29 @@ class Distance(object):
 
 
 class Time(object):
-    def __init__(self):
+    def __init__(self, time_string = None):
         self._secs = None
         # Conversion constants
-        self._secs_in = {
-            'min': 60, 
-            'hr': 3600 }
+        self._secs_in = {'s': 1, 'min': 60, 'hr': 3600 }
+        if time_string is not None:
+            self._secs = self.time_from_string(time_string)
+        
+    def time_from_string(self, time_string):
+        '''Define a grammar to get the time from the given string.
+        Examples: .3s, 10min, 0.7hr, 5 Min, 2 Hr, etc.
+        '''
+        from pyparsing import CaselessLiteral, replaceWith, Or, nums, Word
+        
+        def makeLit(s, val):
+            ret = CaselessLiteral(s).setName(s)
+            return ret.setParseAction(replaceWith(val))
+            
+        unitDefinitions = [(k,v) for k,v in self._secs_in.iteritems()]
+        units = Or( [ makeLit(s,v) for s,v in unitDefinitions ] )
+        number = Word(nums + '.')
+        dimension = number + units
+        a = dimension.parseString(time_string)
+        return float(a[0])*a[1]
         
     @property
     def s(self):
