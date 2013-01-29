@@ -70,3 +70,85 @@ class Distance(object):
     def marathon(self, value):
         self._meters = value*self._meters_in['marathon']
 
+
+class Time(object):
+    def __init__(self):
+        self._secs = None
+        # Conversion constants
+        self._secs_in = {
+            'min': 60, 
+            'hr': 3600 }
+        
+    @property
+    def s(self):
+        '''Time in seconds.'''
+        return self._secs
+        
+    @s.setter
+    def s(self, value):
+        self._secs = value
+        
+    @property
+    def min(self):
+        '''Time in minutes.'''
+        return self._secs/self._secs_in['min']
+        
+    @min.setter
+    def min(self, value):
+        self._secs = value*self._secs_in['min']
+        
+    @property
+    def hr(self):
+        '''Time in hours.'''
+        return self._secs/self._secs_in['hr']
+               
+    @hr.setter
+    def hr(self, value):
+        self._secs = value*self._secs_in['hr']
+        
+    @property
+    def str(self):
+        secs = self._secs
+        hours = int(secs/self._secs_in['hr'])
+        secs = secs - hours*self._secs_in['hr']
+        mins = int(secs/self._secs_in['min'])
+        secs = int(secs - mins*self._secs_in['min'])
+        result = ""
+        if hours > 0:
+            result = result + str(hours) + ":"
+        result = result + '{0:02d}:{1:02d}'.format(mins,secs)
+        return result
+
+class Speed(object):
+    def __init__(self):
+        self._mps = None # store internally in meters/sec
+        # Conversions
+        d = Distance('1 mi')
+        t = Time()
+        t.hr = 1
+        self._mph_to_mps = d.m/t.s
+        
+    @property
+    def mps(self):
+        '''Speed in meters/second.'''
+        return self._mps
+        
+    @mps.setter
+    def mps(self, value):
+        self._mps = value
+        
+    @property
+    def mph(self):
+        '''Speed in miles per hour.'''
+        return self._mps/self._mph_to_mps
+        
+    @mph.setter
+    def mph(self, value):
+        self._mps = value*self._mph_to_mps
+        
+    def pace(self, distance):
+        '''Return time to cover given distance.'''
+        t = Time()
+        t.s = distance.m/self.mps
+        return t
+        
