@@ -13,6 +13,7 @@ class TestQuantityStringParser(unittest.TestCase):
         self.assertEqual(p('1 m'), 1)
         self.assertEqual(p('2 meter'), 2)
         self.assertEqual(p('4 meters'), 4)
+        self.assertEqual(p('4 meterswhatever else'), 4) # ignores tail
         self.assertEqual(p('2Km'), 2000)
         self.assertEqual(p('0.1 kms'), 100)
 
