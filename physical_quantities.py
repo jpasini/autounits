@@ -1,3 +1,8 @@
+"""
+physical_quantities.py: Library of physical quantities, with automatic
+unit conversion.
+"""
+
 from __future__ import division
 
 class Distance(object):
