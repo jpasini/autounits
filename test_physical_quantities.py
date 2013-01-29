@@ -14,20 +14,30 @@ class TestQuantityStringParser(unittest.TestCase):
         """Test simple cases """
         # The results are in meters because that was the basic unit.
         self.assertEqual(self.p('1 m'), 1)
+        self.assertEqual(self.p(' 1 m'), 1) # spaces are ignored
+        self.assertEqual(self.p('1 m '), 1)
         self.assertEqual(self.p('2 meter'), 2)
         self.assertEqual(self.p('2.5Km'), 2500) # spaces ignored, case-insensitive
         self.assertEqual(self.p('0.1 kms'), 100)
         self.assertEqual(self.p('.3 kms'), 300)
         self.assertEqual(self.p('1. kms'), 1000)
+        self.assertEqual(self.p('1e-3 kms'), 1)
+        self.assertEqual(self.p('1.2e-2 kms'), 12)
+        self.assertEqual(self.p('1.2e2 m'), 120)
+        self.assertEqual(self.p('1.2e+2 m'), 120)
         
     def test_for_bad_inputs(self):
         """Test for inputs that should raise exceptions."""
+        self.assertRaises(BadInputError, self.p, '1 1 m') # too many numbers
+        # extra input after valid input
+        self.assertRaises(BadInputError, self.p, '1 m 1')
         self.assertRaises(BadInputError, self.p, '1.1.1 m') # bad number
         # Unknown unit that matches a valid entry with extras
         self.assertRaises(BadInputError, self.p, '4 meters')
         self.assertRaises(BadInputError, self.p, '1 mile')
-        # bad order
-        self.assertRaises(BadInputError, self.p, 'm 3')
+        self.assertRaises(BadInputError, self.p, 'm 3') # bad order
+        self.assertRaises(BadInputError, self.p, '1e -3 kms')
+        self.assertRaises(BadInputError, self.p, '1.2ee-3 kms')
 
 
 class TestDistance(unittest.TestCase):

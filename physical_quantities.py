@@ -18,7 +18,7 @@ class PhysicalQuantityStringParser(object):
         
         Note that the unit associated with "1" would be the basic unit.
         """
-        from pyparsing import CaselessLiteral, replaceWith, Or, nums, Word
+        from pyparsing import CaselessLiteral, replaceWith, Or, nums, Word, stringEnd
         
         def makeLit(s, val):
             ret = CaselessLiteral(s).setName(s)
@@ -26,13 +26,20 @@ class PhysicalQuantityStringParser(object):
             
         unitDefinitions = [(k,v) for k,v in units_dictionary.iteritems()]
         units = Or( [ makeLit(s,v) for s,v in unitDefinitions ] )
-        number = Word(nums + '.')
-        self._dimension = number + units
+        number = Word(nums + 'e' + '-' + '+' + '.')
+        self._dimension = number + units + stringEnd
         
     def __call__(self, quantity_string):
         """Parse the given string."""
-        a = self._dimension.parseString(quantity_string)
-        return float(a[0])*a[1]
+        from pyparsing import ParseException
+        try:
+            a = self._dimension.parseString(quantity_string)
+        except ParseException:
+            raise BadInputError
+        try:
+            return float(a[0])*a[1]
+        except ValueError:
+            raise BadInputError
         
 
 class Distance(object):
