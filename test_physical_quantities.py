@@ -7,12 +7,14 @@ class TestQuantityStringParser(unittest.TestCase):
     """Tests for the string parser for physical quantities."""
     
     def test_simple_parser(self):
-        meters_in = {'m' : 1, 'km': 1000}
+        meters_in = {'m' : 1, 'meter': 1, 'km': 1000}
         p = PhysicalQuantityStringParser(meters_in)
         # The results are in meters because that was the basic unit.
         self.assertEqual(p('1 m'), 1)
+        self.assertEqual(p('2 meter'), 2)
+        self.assertEqual(p('4 meters'), 4)
         self.assertEqual(p('2Km'), 2000)
-        self.assertEqual(p('0.1 kM'), 100)
+        self.assertEqual(p('0.1 kms'), 100)
 
 
 class TestDistance(unittest.TestCase):
