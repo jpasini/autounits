@@ -134,12 +134,34 @@ class Time(object):
         return result
 
 class Speed(object):
-    def __init__(self):
+    def __init__(self, speed_string = None):
         self._mps = None # store internally in meters/sec
         # Conversions
         d = Distance('1 mi')
         t = Time('1 hr')
         self._mph_to_mps = d.m/t.s
+
+        # Conversion constants
+        self._mps_in = {'mps': 1, 'mph': d.m/t.s }
+        if speed_string is not None:
+            self._mps = self.speed_from_string(speed_string)
+        
+    def speed_from_string(self, speed_string):
+        '''Define a grammar to get the speed from the given string.
+        Examples: .3mps, 10mph, 0.7 mps, 5 MPH, etc.
+        '''
+        from pyparsing import CaselessLiteral, replaceWith, Or, nums, Word
+        
+        def makeLit(s, val):
+            ret = CaselessLiteral(s).setName(s)
+            return ret.setParseAction(replaceWith(val))
+            
+        unitDefinitions = [(k,v) for k,v in self._mps_in.iteritems()]
+        units = Or( [ makeLit(s,v) for s,v in unitDefinitions ] )
+        number = Word(nums + '.')
+        dimension = number + units
+        a = dimension.parseString(speed_string)
+        return float(a[0])*a[1]
         
     @property
     def mps(self):
