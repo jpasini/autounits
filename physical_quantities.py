@@ -10,6 +10,7 @@ class Distance(object):
         self._meters = None
         # Conversion constants
         self._meters_in = {
+            'm': 1,
             'mi': 1609.344, 
             'km': 1000, 
             'marathon': 42194.988 }
@@ -26,12 +27,7 @@ class Distance(object):
             ret = CaselessLiteral(s).setName(s)
             return ret.setParseAction(replaceWith(val))
             
-        unitDefinitions = [
-            ('m', 1),
-            ('km', 1000),
-            ('mi', 1609.344),
-            ('marathon', 42194.988),
-            ]        
+        unitDefinitions = [(k,v) for k,v in self._meters_in.iteritems()]
         units = Or( [ makeLit(s,v) for s,v in unitDefinitions ] )
         number = Word(nums + '.')
         dimension = number + units
