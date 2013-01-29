@@ -9,17 +9,13 @@ class Distance(object):
     def __init__(self, distance_string = None):
         self._meters = None
         # Conversion constants
-        self._meters_in = {
-            'm': 1,
-            'mi': 1609.344, 
-            'km': 1000, 
-            'marathon': 42194.988 }
+        self._meters_in = {'m': 1, 'mi': 1609.344, 'km': 1000, 'marathon': 42194.988 }
         if distance_string is not None:
             self._meters = self.distance_from_string(distance_string)
         
     def distance_from_string(self, distance_string):
         '''Define a grammar to get the distance from the given string.
-        Examples: .3m, 10mi, 0.7marathons, 5 m, 2 km, 6 Km, 8 miles, etc.
+        Examples: .3m, 10mi, 0.7marathon, 5 m, 2 km, 6 Km, 8 mi, etc.
         '''
         from pyparsing import CaselessLiteral, replaceWith, Or, nums, Word
         
@@ -142,8 +138,7 @@ class Speed(object):
         self._mps = None # store internally in meters/sec
         # Conversions
         d = Distance('1 mi')
-        t = Time()
-        t.hr = 1
+        t = Time('1 hr')
         self._mph_to_mps = d.m/t.s
         
     @property
