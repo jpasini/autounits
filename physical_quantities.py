@@ -5,6 +5,8 @@ Library of physical quantities, with automatic unit conversion.
 
 from __future__ import division
 
+class PhysicalQuantityError(Exception): pass
+class BadInputError(PhysicalQuantityError): pass
 
 class PhysicalQuantityStringParser(object):
     """Object that parses a string representing an amount with units."""

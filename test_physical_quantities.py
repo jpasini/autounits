@@ -1,22 +1,33 @@
 from __future__ import division
 
 import unittest
-from physical_quantities import Distance, Time, Speed, PhysicalQuantityStringParser
+from physical_quantities import Distance, Time, Speed
+from physical_quantities import PhysicalQuantityStringParser, BadInputError
 
 
 class TestQuantityStringParser(unittest.TestCase):
     """Tests for the string parser for physical quantities."""
+    meters_in = {'m' : 1, 'meter': 1, 'km': 1000, 'kms': 1000}
+    p = PhysicalQuantityStringParser(meters_in)
     
     def test_simple_parser(self):
-        meters_in = {'m' : 1, 'meter': 1, 'km': 1000}
-        p = PhysicalQuantityStringParser(meters_in)
+        """Test simple cases """
         # The results are in meters because that was the basic unit.
-        self.assertEqual(p('1 m'), 1)
-        self.assertEqual(p('2 meter'), 2)
-        self.assertEqual(p('4 meters'), 4)
-        self.assertEqual(p('4 meterswhatever else'), 4) # ignores tail
-        self.assertEqual(p('2Km'), 2000)
-        self.assertEqual(p('0.1 kms'), 100)
+        self.assertEqual(self.p('1 m'), 1)
+        self.assertEqual(self.p('2 meter'), 2)
+        self.assertEqual(self.p('2.5Km'), 2500) # spaces ignored, case-insensitive
+        self.assertEqual(self.p('0.1 kms'), 100)
+        self.assertEqual(self.p('.3 kms'), 300)
+        self.assertEqual(self.p('1. kms'), 1000)
+        
+    def test_for_bad_inputs(self):
+        """Test for inputs that should raise exceptions."""
+        self.assertRaises(BadInputError, self.p, '1.1.1 m') # bad number
+        # Unknown unit that matches a valid entry with extras
+        self.assertRaises(BadInputError, self.p, '4 meters')
+        self.assertRaises(BadInputError, self.p, '1 mile')
+        # bad order
+        self.assertRaises(BadInputError, self.p, 'm 3')
 
 
 class TestDistance(unittest.TestCase):
