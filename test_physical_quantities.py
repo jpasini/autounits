@@ -3,6 +3,7 @@ from __future__ import division
 import unittest
 from physical_quantities import Distance, Time, Speed, PhysicalQuantityStringParser
 
+
 class TestQuantityStringParser(unittest.TestCase):
     """Tests for the string parser for physical quantities."""
     
@@ -53,6 +54,7 @@ class TestTime(unittest.TestCase):
             evaluate_in_own_units = getattr(t, unit)
             self.assertEqual(evaluate_in_own_units, 1)
         
+        
 class TestSpeed(unittest.TestCase):
     """Tests for the Speed class."""
     # speed, distance for pace, pace
@@ -61,13 +63,20 @@ class TestSpeed(unittest.TestCase):
         ['1 mph', '1 mi', '1 hr']
         ]
         
+    def test_simle_speeds(self):
+        """Create a few speeds and check the value."""
+        s = Speed('1 mph')
+        self.assertEqual(s.mph, 1)
+        s.mph = 2.5
+        self.assertEqual(s.mph, 2.5)
+        self.assertEqual(s.mps, 2.5*Distance('1mi').m/Time('1hr').s)
+
     def test_check_known_pace(self):
         """Check pace for some speeds."""
         for speed, distance, pace in self.known_values:
             s, d, t = Speed(speed), Distance(distance), Time(pace)
             self.assertEqual(s.pace(d).s, t.s) # the seconds should be correct
-            
-        
+                    
 
 if __name__ == '__main__':
     unittest.main()

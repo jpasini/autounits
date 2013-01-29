@@ -128,16 +128,12 @@ class Time(object):
         result = result + '{0:02d}:{1:02d}'.format(mins,secs)
         return result
 
+
 class Speed(object):
     def __init__(self, speed_string = None):
         self._mps = None # store internally in meters/sec
-        # Conversions
-        d = Distance('1 mi')
-        t = Time('1 hr')
-        self._mph_to_mps = d.m/t.s
-
         # Conversion constants
-        self._mps_in = {'mps': 1, 'mph': d.m/t.s }
+        self._mps_in = {'mps': 1, 'mph': Distance('1 mi').m/Time('1 hr').s }
         self._parser = PhysicalQuantityStringParser(self._mps_in)
         if speed_string is not None:
             self._mps = self._parser(speed_string)
@@ -154,11 +150,11 @@ class Speed(object):
     @property
     def mph(self):
         '''Speed in miles per hour.'''
-        return self._mps/self._mph_to_mps
+        return self._mps/self._mps_in['mph']
         
     @mph.setter
     def mph(self, value):
-        self._mps = value*self._mph_to_mps
+        self._mps = value*self._mps_in['mph']
         
     def pace(self, distance):
         '''Return time to cover given distance.'''
