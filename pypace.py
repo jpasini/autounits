@@ -1,6 +1,6 @@
 from __future__ import division
 
-from distance import Distance, Time, Speed
+from physical_quantities import Distance, Time, Speed
 
 def print_table_row(mph):
     '''Print mph and pace for 1 mile, 5k, 10k, half, and full marathon.'''
