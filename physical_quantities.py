@@ -14,11 +14,12 @@ class PhysicalQuantityStringParser(object):
         """Define a parser based on the given units_dictionary.
         For example, for distances you would use:
         
-        units_dictionary = {'m': 1, 'mi': 1609.344}
+        units_dictionary = {'m': 1, 'meters': 1, 'mi': 1609.344}
         
-        Note that the unit associated with "1" would be the basic unit.
+        Note that the unit associated with "1" would be the basic unit,
+        and that synonyms can be included by repeating the amount.
         """
-        from pyparsing import CaselessLiteral, replaceWith, Or, nums, Word, stringEnd
+        from pyparsing import CaselessLiteral, replaceWith, Or, nums, Word, stringEnd, ParseException
         
         def makeLit(s, val):
             ret = CaselessLiteral(s).setName(s)
@@ -26,7 +27,13 @@ class PhysicalQuantityStringParser(object):
             
         unitDefinitions = [(k,v) for k,v in units_dictionary.iteritems()]
         units = Or( [ makeLit(s,v) for s,v in unitDefinitions ] )
+        def validate_number(tokens):
+            try:
+                float(tokens[0])
+            except ValueError:
+                raise ParseException("Invalid number (%s)" % tokens[0])
         number = Word(nums + 'e' + '-' + '+' + '.')
+        number.setParseAction(validate_number)
         self._dimension = number + units + stringEnd
         
     def __call__(self, quantity_string):
@@ -36,10 +43,7 @@ class PhysicalQuantityStringParser(object):
             a = self._dimension.parseString(quantity_string)
         except ParseException:
             raise BadInputError
-        try:
-            return float(a[0])*a[1]
-        except ValueError:
-            raise BadInputError
+        return float(a[0])*a[1]
         
 
 class Distance(object):

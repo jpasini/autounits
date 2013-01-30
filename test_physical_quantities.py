@@ -30,6 +30,7 @@ class TestQuantityStringParser(unittest.TestCase):
         """Test for inputs that should raise exceptions."""
         self.assertRaises(BadInputError, self.p, '1 1 m') # too many numbers
         # extra input after valid input
+        self.assertRaises(BadInputError, self.p, '1 m m') # too many units
         self.assertRaises(BadInputError, self.p, '1 m 1')
         self.assertRaises(BadInputError, self.p, '1.1.1 m') # bad number
         # Unknown unit that matches a valid entry with extras
