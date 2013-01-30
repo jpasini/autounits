@@ -19,14 +19,13 @@ class PhysicalQuantityStringParser(object):
         Note that the unit associated with "1" would be the basic unit,
         and that synonyms can be included by repeating the amount.
         """
-        from pyparsing import CaselessLiteral, replaceWith, Or, nums, Word, stringEnd, ParseException
+        from pyparsing import CaselessLiteral, replaceWith, \
+            Or, nums, Word, stringEnd, ParseException
         
-        def makeLit(s, val):
-            ret = CaselessLiteral(s).setName(s)
-            return ret.setParseAction(replaceWith(val))
-            
-        unitDefinitions = [(k,v) for k,v in units_dictionary.iteritems()]
-        units = Or( [ makeLit(s,v) for s,v in unitDefinitions ] )
+        def make_literal(unit_string, val):
+            return CaselessLiteral(unit_string).setParseAction(replaceWith(val))
+        units = Or( [ make_literal(s,v) for s,v in units_dictionary.iteritems() ] )
+        
         def validate_number(tokens):
             try:
                 float(tokens[0])
@@ -34,6 +33,7 @@ class PhysicalQuantityStringParser(object):
                 raise ParseException("Invalid number (%s)" % tokens[0])
         number = Word(nums + 'e' + '-' + '+' + '.')
         number.setParseAction(validate_number)
+        
         self._dimension = number + units + stringEnd
         
     def __call__(self, quantity_string):
