@@ -5,6 +5,8 @@ Library of physical quantities, with automatic unit conversion.
 
 from __future__ import division
 
+class PhysicalQuantityError(Exception): pass
+class BadInputError(PhysicalQuantityError): pass
 
 class PhysicalQuantityStringParser(object):
     """Object that parses a string representing an amount with units."""
@@ -12,24 +14,35 @@ class PhysicalQuantityStringParser(object):
         """Define a parser based on the given units_dictionary.
         For example, for distances you would use:
         
-        units_dictionary = {'m': 1, 'mi': 1609.344}
+        units_dictionary = {'m': 1, 'meters': 1, 'mi': 1609.344}
         
-        Note that the unit associated with "1" would be the basic unit.
+        Note that the unit associated with "1" would be the basic unit,
+        and that synonyms can be included by repeating the amount.
         """
-        from pyparsing import CaselessLiteral, replaceWith, Or, nums, Word
+        from pyparsing import CaselessLiteral, replaceWith, \
+            Or, nums, Word, stringEnd, ParseException
         
-        def makeLit(s, val):
-            ret = CaselessLiteral(s).setName(s)
-            return ret.setParseAction(replaceWith(val))
-            
-        unitDefinitions = [(k,v) for k,v in units_dictionary.iteritems()]
-        units = Or( [ makeLit(s,v) for s,v in unitDefinitions ] )
-        number = Word(nums + '.')
-        self._dimension = number + units
+        def make_literal(unit_string, val):
+            return CaselessLiteral(unit_string).setParseAction(replaceWith(val))
+        units = Or( [ make_literal(s,v) for s,v in units_dictionary.iteritems() ] )
+        
+        def validate_number(tokens):
+            try:
+                float(tokens[0])
+            except ValueError:
+                raise ParseException("Invalid number (%s)" % tokens[0])
+        number = Word(nums + 'e' + '-' + '+' + '.')
+        number.setParseAction(validate_number)
+        
+        self._dimension = number + units + stringEnd
         
     def __call__(self, quantity_string):
         """Parse the given string."""
-        a = self._dimension.parseString(quantity_string)
+        from pyparsing import ParseException
+        try:
+            a = self._dimension.parseString(quantity_string)
+        except ParseException:
+            raise BadInputError
         return float(a[0])*a[1]
         
 
