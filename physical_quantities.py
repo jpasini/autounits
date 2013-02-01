@@ -7,6 +7,7 @@ from __future__ import division
 
 class PhysicalQuantityError(Exception): pass
 class BadInputError(PhysicalQuantityError): pass
+class BadUnitDictionaryError(PhysicalQuantityError): pass
 
 class PhysicalQuantityStringParser(object):
     """Object that parses a string representing an amount with units."""
@@ -14,17 +15,36 @@ class PhysicalQuantityStringParser(object):
         """Define a parser based on the given units_dictionary.
         For example, for distances you would use:
         
-        units_dictionary = {'m': 1, 'meters': 1, 'mi': 1609.344}
+        units_dictionary = {('m', 'meters'): 1, 'mi': 1609.344}
         
-        Note that the unit associated with "1" would be the basic unit,
-        and that synonyms can be included by repeating the amount.
         """
-        from pyparsing import CaselessLiteral, replaceWith, \
+        # Make sure there are no name clashes in the units
+        from itertools import chain, ifilter
+        k = units_dictionary.keys()
+        a = list(ifilter(lambda x: type(x) == tuple, k)) # find tuples
+        rest = list(ifilter(lambda x: type(x) != tuple, k))
+        flattened_tuples = list(chain(*a))
+        # join
+        rejoined = flattened_tuples + rest
+        flattened_keys = set(rejoined)
+        if len(flattened_keys) != len(rejoined):
+            raise BadUnitDictionaryError
+            
+        # At this point there are no name clashes, so flatten
+        new_dictionary = dict()
+        for k,v in units_dictionary.iteritems():
+            if type(k) != tuple:
+                new_dictionary[k] = v
+            else:
+                for l in k:
+                    new_dictionary[l] = v
+        
+        from pyparsing import Literal, replaceWith, \
             Or, nums, Word, stringEnd, ParseException
         
         def make_literal(unit_string, val):
-            return CaselessLiteral(unit_string).setParseAction(replaceWith(val))
-        units = Or( [ make_literal(s,v) for s,v in units_dictionary.iteritems() ] )
+            return Literal(unit_string).setParseAction(replaceWith(val))
+        units = Or( [ make_literal(s,v) for s,v in new_dictionary.iteritems() ] )
         
         def validate_number(tokens):
             try:
