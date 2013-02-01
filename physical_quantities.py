@@ -21,11 +21,11 @@ class PhysicalQuantityStringParser(object):
         # Make sure there are no name clashes in the units
         from itertools import chain, ifilter
         k = units_dictionary.keys()
-        a = list(ifilter(lambda x: type(x) == tuple, k)) # find tuples
-        rest = list(ifilter(lambda x: type(x) != tuple, k))
-        flattened_tuples = list(chain(*a))
+        tuples     = list(ifilter(lambda x: type(x) == tuple, k)) # find tuples
+        not_tuples = list(ifilter(lambda x: type(x) != tuple, k))
+        flattened_tuples = list(chain(*tuples))
         # join
-        rejoined = flattened_tuples + rest
+        rejoined = flattened_tuples + not_tuples
         flattened_keys = set(rejoined)
         if len(flattened_keys) != len(rejoined):
             raise BadUnitDictionaryError
