@@ -65,8 +65,10 @@ class PhysicalQuantityStringParser(object):
             raise BadInputError
         return float(a[0])*a[1]
         
+class PhysicalQuantity(object):
+    pass
 
-class Distance(object):
+class Distance(PhysicalQuantity):
     def __init__(self, value = None):
         self._meters = None
         # Conversion constants
@@ -128,7 +130,7 @@ class Distance(object):
         self._meters = value*self._meters_in['marathon']
 
 
-class Time(object):
+class Time(PhysicalQuantity):
     def __init__(self, time_string = None):
         self._secs = None
         # Conversion constants
@@ -178,7 +180,7 @@ class Time(object):
         return result
 
 
-class Speed(object):
+class Speed(PhysicalQuantity):
     def __init__(self, speed_string = None):
         self._mps = None # store internally in meters/sec
         # Conversion constants
