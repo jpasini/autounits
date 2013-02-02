@@ -38,6 +38,8 @@ class PhysicalQuantityStringParser(object):
             else:
                 for l in k:
                     new_dictionary[l] = v
+                    
+        self.flat_units_dictionary = new_dictionary
         
         from pyparsing import Literal, replaceWith, \
             Or, nums, Word, stringEnd, ParseException
@@ -82,7 +84,7 @@ class PhysicalQuantity(object):
         def make_setter(yardstick):
             return lambda s,val: setattr(s,'_amount_in_basic_units', val*yardstick)
             
-        for unit_name, yardstick in units_dictionary.iteritems():
+        for unit_name, yardstick in self._parser.flat_units_dictionary.iteritems():
             getter = make_getter(yardstick)
             setter = make_setter(yardstick)
             setattr(self.__class__, unit_name, property(getter, setter))

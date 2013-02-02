@@ -1,7 +1,7 @@
 from __future__ import division
 
 import unittest
-from physical_quantities import Distance, Time, Speed
+from physical_quantities import PhysicalQuantity, Distance, Time, Speed
 from physical_quantities import PhysicalQuantityStringParser, BadInputError, BadUnitDictionaryError
 
 
@@ -51,6 +51,36 @@ class TestQuantityStringParser(unittest.TestCase):
         self.assertRaises(BadInputError, p, '1e -3 kms')
         self.assertRaises(BadInputError, p, '1.2ee-3 kms')
 
+class TestPhysicalQuantity(unittest.TestCase):
+    """Test the abstract PhysicalQuantity class."""
+    
+    def test_create_simply_physical_quantity(self):
+        """Simple physical quantities without synonyms."""
+        meters_in = {'m' : 1, 'mm': 0.001, 'km': 1000}
+        p = PhysicalQuantity(meters_in, "2m")
+        self.assertEqual(p.m, 2)
+        self.assertEqual(p.mm, 2000)
+        self.assertEqual(p.km, 0.002)
+        p.m = 1000
+        self.assertEqual(p.m, 1000)
+        self.assertEqual(p.mm, 1000000)
+        self.assertEqual(p.km, 1)
+
+    def test_create_physical_quantity_with_synonyms(self):
+        """Test physical quantities with synonyms."""
+        meters_in = {('m', 'meters') : 1, 'mm': 0.001, ('km','kilometers'): 1000}
+        p = PhysicalQuantity(meters_in, "3m")
+        self.assertEqual(p.m, 3)
+        self.assertEqual(p.meters, 3)
+        self.assertEqual(p.mm, 3000)
+        self.assertEqual(p.km, 0.003)
+        self.assertEqual(p.kilometers, 0.003)
+        p.km = 2
+        self.assertEqual(p.m, 2000)
+        self.assertEqual(p.meters, 2000)
+        self.assertEqual(p.mm, 2000000)
+        self.assertEqual(p.km, 2)
+        self.assertEqual(p.kilometers, 2)
 
 class TestDistance(unittest.TestCase):
     """Tests for the Distance class."""
