@@ -66,68 +66,70 @@ class PhysicalQuantityStringParser(object):
         return float(a[0])*a[1]
         
 class PhysicalQuantity(object):
-    pass
+    def __init__(self, units_dictionary, value = None):
+        self._amount_in_basic_units = None
+        self._parser = PhysicalQuantityStringParser(units_dictionary)
+        if value is not None:
+            if type(value) == str:
+                self._amount_in_basic_units = self._parser(value)
+            elif type(value) == type(self):
+                self._amount_in_basic_units = value._amount_in_basic_units
 
 class Distance(PhysicalQuantity):
     def __init__(self, value = None):
-        self._meters = None
+        self._amount_in_basic_units = None # meters
         # Conversion constants
         self._meters_in = {'m': 1, 'mi': 1609.344, 'km': 1000, 'marathon': 42194.988 }
-        self._parser = PhysicalQuantityStringParser(self._meters_in)
-        if value is not None:
-            if type(value) == str:
-                self._meters = self._parser(value)
-            elif type(value) == type(self):
-                self._meters = value._meters
+        PhysicalQuantity.__init__(self, self._meters_in, value)
                 
     def __eq__(self, other):
-        return self.m == other.m
+        return self._amount_in_basic_units == other._amount_in_basic_units
     
     def __add__(self, other):
         result = Distance()
-        result.m = self.m + other.m
+        result._amount_in_basic_units = self._amount_in_basic_units + other._amount_in_basic_units
         return result
         
     def __sub__(self, other):
         result = Distance()
-        result.m = self.m - other.m
+        result._amount_in_basic_units = self._amount_in_basic_units - other._amount_in_basic_units
         return result
         
     @property
     def m(self):
         '''Distance in meters.'''
-        return self._meters
+        return self._amount_in_basic_units
         
     @m.setter
     def m(self, value):
-        self._meters = value
+        self._amount_in_basic_units = value
         
     @property
     def mi(self):
         '''Distance in miles.'''
-        return self._meters/self._meters_in['mi']
+        return self._amount_in_basic_units/self._meters_in['mi']
         
     @mi.setter
     def mi(self, value):
-        self._meters = value*self._meters_in['mi']
+        self._amount_in_basic_units = value*self._meters_in['mi']
         
     @property
     def km(self):
         '''Distance in km.'''
-        return self._meters/self._meters_in['km']
+        return self._amount_in_basic_units/self._meters_in['km']
         
     @km.setter
     def km(self, value):
-        self._meters = value*self._meters_in['km']
+        self._amount_in_basic_units = value*self._meters_in['km']
         
     @property
     def marathon(self):
         '''Distance in marathons.'''
-        return self._meters/self._meters_in['marathon']
+        return self._amount_in_basic_units/self._meters_in['marathon']
         
     @marathon.setter
     def marathon(self, value):
-        self._meters = value*self._meters_in['marathon']
+        self._amount_in_basic_units = value*self._meters_in['marathon']
 
 
 class Time(PhysicalQuantity):
