@@ -74,7 +74,19 @@ class PhysicalQuantity(object):
                 self._amount_in_basic_units = self._parser(value)
             elif type(value) == type(self):
                 self._amount_in_basic_units = value._amount_in_basic_units
-
+        
+        # Add the getter/setter properties for each unit
+        def make_getter(yardstick):
+            return lambda s: s._amount_in_basic_units/yardstick
+            
+        def make_setter(yardstick):
+            return lambda s,val: setattr(s,'_amount_in_basic_units', val*yardstick)
+            
+        for unit_name, yardstick in units_dictionary.iteritems():
+            getter = make_getter(yardstick)
+            setter = make_setter(yardstick)
+            setattr(self.__class__, unit_name, property(getter, setter))
+                
     def __eq__(self, other):
         """Equality is defined by the type and amount."""
         return type(self) == type(other) and self._amount_in_basic_units == other._amount_in_basic_units
@@ -93,125 +105,23 @@ class PhysicalQuantity(object):
 class Distance(PhysicalQuantity):
     def __init__(self, value = None):
         # Conversion constants
-        self._meters_in = {'m': 1, 'mi': 1609.344, 'km': 1000, 'marathon': 42194.988 }
-        PhysicalQuantity.__init__(self, self._meters_in, value)
-                
-    @property
-    def m(self):
-        '''Distance in meters.'''
-        return self._amount_in_basic_units
-        
-    @m.setter
-    def m(self, value):
-        self._amount_in_basic_units = value
-        
-    @property
-    def mi(self):
-        '''Distance in miles.'''
-        return self._amount_in_basic_units/self._meters_in['mi']
-        
-    @mi.setter
-    def mi(self, value):
-        self._amount_in_basic_units = value*self._meters_in['mi']
-        
-    @property
-    def km(self):
-        '''Distance in km.'''
-        return self._amount_in_basic_units/self._meters_in['km']
-        
-    @km.setter
-    def km(self, value):
-        self._amount_in_basic_units = value*self._meters_in['km']
-        
-    @property
-    def marathon(self):
-        '''Distance in marathons.'''
-        return self._amount_in_basic_units/self._meters_in['marathon']
-        
-    @marathon.setter
-    def marathon(self, value):
-        self._amount_in_basic_units = value*self._meters_in['marathon']
-
+        meters_in = {'m': 1, 'mi': 1609.344, 'km': 1000, 'marathon': 42194.988 }
+        PhysicalQuantity.__init__(self, meters_in, value)
 
 class Time(PhysicalQuantity):
-    def __init__(self, time_string = None):
-        self._secs = None
+    def __init__(self, value = None):
         # Conversion constants
-        self._secs_in = {'s': 1, 'min': 60, 'hr': 3600 }
-        self._parser = PhysicalQuantityStringParser(self._secs_in)
-        if time_string is not None:
-            self._secs = self._parser(time_string)
-        
-    @property
-    def s(self):
-        '''Time in seconds.'''
-        return self._secs
-        
-    @s.setter
-    def s(self, value):
-        self._secs = value
-        
-    @property
-    def min(self):
-        '''Time in minutes.'''
-        return self._secs/self._secs_in['min']
-        
-    @min.setter
-    def min(self, value):
-        self._secs = value*self._secs_in['min']
-        
-    @property
-    def hr(self):
-        '''Time in hours.'''
-        return self._secs/self._secs_in['hr']
-               
-    @hr.setter
-    def hr(self, value):
-        self._secs = value*self._secs_in['hr']
-        
-    @property
-    def str(self):
-        secs = self._secs
-        hours = int(secs/self._secs_in['hr'])
-        secs = secs - hours*self._secs_in['hr']
-        mins = int(secs/self._secs_in['min'])
-        secs = int(secs - mins*self._secs_in['min'])
-        result = ""
-        if hours > 0:
-            result = result + str(hours) + ":"
-        result = result + '{0:02d}:{1:02d}'.format(mins,secs)
-        return result
-
+        secs_in = {'s': 1, 'min': 60, 'hr': 3600 }
+        PhysicalQuantity.__init__(self, secs_in, value)
 
 class Speed(PhysicalQuantity):
-    def __init__(self, speed_string = None):
-        self._mps = None # store internally in meters/sec
+    def __init__(self, value = None):
         # Conversion constants
-        self._mps_in = {'mps': 1, 'mph': Distance('1 mi').m/Time('1 hr').s }
-        self._parser = PhysicalQuantityStringParser(self._mps_in)
-        if speed_string is not None:
-            self._mps = self._parser(speed_string)
-        
-    @property
-    def mps(self):
-        '''Speed in meters/second.'''
-        return self._mps
-        
-    @mps.setter
-    def mps(self, value):
-        self._mps = value
-        
-    @property
-    def mph(self):
-        '''Speed in miles per hour.'''
-        return self._mps/self._mps_in['mph']
-        
-    @mph.setter
-    def mph(self, value):
-        self._mps = value*self._mps_in['mph']
+        mps_in = {'mps': 1, 'mph': Distance('1 mi').m/Time('1 hr').s }
+        PhysicalQuantity.__init__(self, mps_in, value)
         
     def pace(self, distance):
-        '''Return time to cover given distance.'''
+        """Return time to cover given distance."""
         t = Time()
         t.s = distance.m/self.mps
         return t

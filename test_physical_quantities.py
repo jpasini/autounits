@@ -128,7 +128,7 @@ class TestSpeed(unittest.TestCase):
         ['1 mph', '1 mi', '1 hr']
         ]
         
-    def test_simle_speeds(self):
+    def test_simple_speeds(self):
         """Create a few speeds and check the value."""
         s = Speed('1 mph')
         self.assertEqual(s.mph, 1)
