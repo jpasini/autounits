@@ -70,11 +70,34 @@ class TestDistance(unittest.TestCase):
             self.assertEqual(evaluate_in_own_units, 1)
             
     def test_distance_adding(self):
-        """Test input from a string."""
+        """Test adding distances."""
         d1 = Distance("10 m")
         d2 = Distance("3 km")
         d3 = d1 + d2
         self.assertEqual(d3.m, 3010)
+        
+    def test_distance_subtracting(self):
+        """Test subtracting distances."""
+        d1 = Distance("10 m")
+        d2 = Distance("3 km")
+        d3 = d2 - d1
+        self.assertEqual(d3.m, 2990)
+        
+    def test_for_distance_equality(self):
+        """Test that distances are only compared by length."""
+        d1 = Distance("1m")
+        d2 = Distance("0.001km")
+        self.assertEqual(d1.m, d2.m) # sanity check before the real test
+        self.assertEqual(d1, d2)
+        
+    def test_creating_from_other_distance(self):
+        """I can create a distance from another."""
+        d1 = Distance("10 m")
+        d2 = Distance(d1)
+        self.assertEqual(d1, d2)
+        d2.m = 2
+        self.assertEqual(d2.m, 2)
+        self.assertEqual(d1.m, 10)
         
 
 class TestTime(unittest.TestCase):

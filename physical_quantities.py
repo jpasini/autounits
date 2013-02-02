@@ -67,17 +67,28 @@ class PhysicalQuantityStringParser(object):
         
 
 class Distance(object):
-    def __init__(self, distance_string = None):
+    def __init__(self, value = None):
         self._meters = None
         # Conversion constants
         self._meters_in = {'m': 1, 'mi': 1609.344, 'km': 1000, 'marathon': 42194.988 }
         self._parser = PhysicalQuantityStringParser(self._meters_in)
-        if distance_string is not None:
-            self._meters = self._parser(distance_string)
-            
+        if value is not None:
+            if type(value) == str:
+                self._meters = self._parser(value)
+            elif type(value) == type(self):
+                self._meters = value._meters
+                
+    def __eq__(self, other):
+        return self.m == other.m
+    
     def __add__(self, other):
         result = Distance()
         result.m = self.m + other.m
+        return result
+        
+    def __sub__(self, other):
+        result = Distance()
+        result.m = self.m - other.m
         return result
         
     @property
