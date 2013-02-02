@@ -75,6 +75,21 @@ class PhysicalQuantity(object):
             elif type(value) == type(self):
                 self._amount_in_basic_units = value._amount_in_basic_units
 
+    def __eq__(self, other):
+        """Equality is purely defined by the amount."""
+        return self._amount_in_basic_units == other._amount_in_basic_units
+    
+    def __add__(self, other):
+        result = type(self)() # Derived classes should initialize without arguments
+        result._amount_in_basic_units = self._amount_in_basic_units + other._amount_in_basic_units
+        return result
+        
+    def __sub__(self, other):
+        result = type(self)() # Derived classes should initialize without arguments
+        result._amount_in_basic_units = self._amount_in_basic_units - other._amount_in_basic_units
+        return result
+
+
 class Distance(PhysicalQuantity):
     def __init__(self, value = None):
         self._amount_in_basic_units = None # meters
@@ -82,19 +97,6 @@ class Distance(PhysicalQuantity):
         self._meters_in = {'m': 1, 'mi': 1609.344, 'km': 1000, 'marathon': 42194.988 }
         PhysicalQuantity.__init__(self, self._meters_in, value)
                 
-    def __eq__(self, other):
-        return self._amount_in_basic_units == other._amount_in_basic_units
-    
-    def __add__(self, other):
-        result = Distance()
-        result._amount_in_basic_units = self._amount_in_basic_units + other._amount_in_basic_units
-        return result
-        
-    def __sub__(self, other):
-        result = Distance()
-        result._amount_in_basic_units = self._amount_in_basic_units - other._amount_in_basic_units
-        return result
-        
     @property
     def m(self):
         '''Distance in meters.'''
