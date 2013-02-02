@@ -14,6 +14,11 @@ class TestQuantityStringParser(unittest.TestCase):
         units_dict = {('m','meter','meters'): 1, 'km': 1000, ('m','mi','mile'): 1600}
         self.assertRaises(BadUnitDictionaryError, PhysicalQuantityStringParser, units_dict)
     
+    def test_flattened_dictionary(self):
+        meters_in = {('m', 'meter') : 1, 'mm': 0.001, ('km', 'kms'): 1000}
+        p = PhysicalQuantityStringParser(meters_in)
+        self.assertEqual(p.flat_units_dictionary, {'m': 1, 'meter': 1, 'mm': 0.001, 'km': 1000, 'kms': 1000})
+    
     def test_simple_parser(self):
         meters_in = {('m', 'meter', 'meters') : 1, 'mm': 0.001, ('km', 'kilometers', 'kms'): 1000}
         p = PhysicalQuantityStringParser(meters_in)
