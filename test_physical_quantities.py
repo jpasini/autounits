@@ -56,6 +56,7 @@ class TestQuantityStringParser(unittest.TestCase):
         self.assertRaises(BadInputError, p, '1e -3 kms')
         self.assertRaises(BadInputError, p, '1.2ee-3 kms')
 
+
 class TestPhysicalQuantity(unittest.TestCase):
     """Test the abstract PhysicalQuantity class."""
     
@@ -87,9 +88,10 @@ class TestPhysicalQuantity(unittest.TestCase):
         self.assertEqual(p.km, 2)
         self.assertEqual(p.kilometers, 2)
 
+
 class TestDistance(unittest.TestCase):
     """Tests for the Distance class."""
-    meters_in = {'m' : 1, 'mi': 1609.344, 'km': 1000, 'marathon': 42194.988 }
+    meters_in = {'m' : 1, 'meters': 1, 'mi': 1609.344, 'miles': 1609.344, 'km': 1000, 'kilometers': 1000, 'marathon': 42194.988 }
         
     def test_create_simple_distances(self):
         """Simple distances."""
@@ -136,10 +138,10 @@ class TestDistance(unittest.TestCase):
         self.assertEqual(d2.m, 2)
         self.assertEqual(d1.m, 10)
         
-
+        
 class TestTime(unittest.TestCase):
     """Tests for the Time class."""
-    seconds_in = {'s': 1, 'min': 60, 'hr': 3600 }
+    seconds_in = {'s': 1, 'seconds': 1, 'min': 60, 'minutes': 60, 'hr': 3600, 'hours': 3600 }
         
     def test_create_simple_times(self):
         """Simple times."""
@@ -153,12 +155,24 @@ class TestTime(unittest.TestCase):
             t = Time('1' + unit) # create "1x" where x is the unit
             evaluate_in_own_units = getattr(t, unit)
             self.assertEqual(evaluate_in_own_units, 1)
+            
+    def test_string_output(self):
+        """Test time output in string format."""
+        t = Time("1 min")
+        self.assertEqual(t.str, "01:00")
+        t = Time("60 s")
+        self.assertEqual(t.str, "01:00")
+        t = Time("3661 s")
+        self.assertEqual(t.str, "1:01:01")
+        t = Time("0.1 s")
+        self.assertEqual(t.str, "00:00")
         
         
 class TestSpeed(unittest.TestCase):
     """Tests for the Speed class."""
     # speed, distance for pace, pace
     known_values = [
+        ['1 m/s', '1 km', '1000s'],
         ['1 mps', '1 km', '1000s'],
         ['1 mph', '1 mi', '1 hr']
         ]

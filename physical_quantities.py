@@ -107,19 +107,34 @@ class PhysicalQuantity(object):
 class Distance(PhysicalQuantity):
     def __init__(self, value = None):
         # Conversion constants
-        meters_in = {'m': 1, 'mi': 1609.344, 'km': 1000, 'marathon': 42194.988 }
+        meters_in = {('m', 'meters'): 1, ('mi', 'miles'): 1609.344, ('km', 'kilometers'): 1000, 'marathon': 42194.988 }
         PhysicalQuantity.__init__(self, meters_in, value)
 
 class Time(PhysicalQuantity):
     def __init__(self, value = None):
         # Conversion constants
-        secs_in = {'s': 1, 'min': 60, 'hr': 3600 }
+        secs_in = {('s', 'seconds'): 1, ('min', 'minutes'): 60, ('hr', 'hours'): 3600 }
         PhysicalQuantity.__init__(self, secs_in, value)
+        
+    @property
+    def str(self):
+        secs = self.s
+        h, m = Time("1 hr"), Time("1 min")
+        hours = int(secs/h.s)
+        secs = secs - hours*h.s
+        mins = int(secs/m.s)
+        secs = int(secs - mins*m.s)
+        result = ""
+        if hours > 0:
+            result = result + str(hours) + ":"
+        result = result + '{0:02d}:{1:02d}'.format(mins,secs)
+        return result
+        
 
 class Speed(PhysicalQuantity):
     def __init__(self, value = None):
         # Conversion constants
-        mps_in = {'mps': 1, 'mph': Distance('1 mi').m/Time('1 hr').s }
+        mps_in = {('mps', 'm/s'): 1, 'mph': Distance('1 mi').m/Time('1 hr').s }
         PhysicalQuantity.__init__(self, mps_in, value)
         
     def pace(self, distance):
