@@ -76,8 +76,8 @@ class PhysicalQuantity(object):
                 self._amount_in_basic_units = value._amount_in_basic_units
 
     def __eq__(self, other):
-        """Equality is purely defined by the amount."""
-        return self._amount_in_basic_units == other._amount_in_basic_units
+        """Equality is defined by the type and amount."""
+        return type(self) == type(other) and self._amount_in_basic_units == other._amount_in_basic_units
     
     def __add__(self, other):
         result = type(self)() # Derived classes should initialize without arguments
@@ -92,7 +92,6 @@ class PhysicalQuantity(object):
 
 class Distance(PhysicalQuantity):
     def __init__(self, value = None):
-        self._amount_in_basic_units = None # meters
         # Conversion constants
         self._meters_in = {'m': 1, 'mi': 1609.344, 'km': 1000, 'marathon': 42194.988 }
         PhysicalQuantity.__init__(self, self._meters_in, value)
