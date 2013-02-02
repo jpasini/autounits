@@ -87,8 +87,27 @@ class TestPhysicalQuantity(unittest.TestCase):
         self.assertEqual(p.mm, 2000000)
         self.assertEqual(p.km, 2)
         self.assertEqual(p.kilometers, 2)
+        
+    def test_comparisons(self):
+        """All comparisons should be available between quantities of the same type."""
+        meters_in = {'m' : 1, 'mm': 0.001, 'km': 1000}
+        p1 = PhysicalQuantity(meters_in, "2m")
+        p2 = PhysicalQuantity(meters_in, "2m")
+        self.assertTrue(p1 == p2)
+        self.assertTrue(p1 >= p2)
+        self.assertTrue(p1 <= p2)
+        self.assertFalse(p1 != p2)
+        self.assertFalse(p1 < p2)
+        self.assertFalse(p1 > p2)
+        p2.km = 1
+        self.assertFalse(p1 == p2)
+        self.assertFalse(p1 >= p2)
+        self.assertTrue(p1 <= p2)
+        self.assertTrue(p1 != p2)
+        self.assertFalse(p1 > p2)
+        self.assertTrue(p1 < p2)
 
-
+        
 class TestDistance(unittest.TestCase):
     """Tests for the Distance class."""
     meters_in = {'m' : 1, 'meters': 1, 'mi': 1609.344, 'miles': 1609.344, 'km': 1000, 'kilometers': 1000, 'marathon': 42194.988 }
