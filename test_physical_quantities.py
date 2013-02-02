@@ -68,6 +68,13 @@ class TestDistance(unittest.TestCase):
             d = Distance('1' + unit) # create "1x" where x is the unit
             evaluate_in_own_units = getattr(d, unit)
             self.assertEqual(evaluate_in_own_units, 1)
+            
+    def test_distance_adding(self):
+        """Test input from a string."""
+        d1 = Distance("10 m")
+        d2 = Distance("3 km")
+        d3 = d1 + d2
+        self.assertEqual(d3.m, 3010)
         
 
 class TestTime(unittest.TestCase):

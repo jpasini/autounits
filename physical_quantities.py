@@ -74,6 +74,11 @@ class Distance(object):
         self._parser = PhysicalQuantityStringParser(self._meters_in)
         if distance_string is not None:
             self._meters = self._parser(distance_string)
+            
+    def __add__(self, other):
+        result = Distance()
+        result.m = self.m + other.m
+        return result
         
     @property
     def m(self):
