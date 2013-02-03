@@ -68,6 +68,9 @@ class PhysicalQuantityStringParser(object):
             raise BadInputError
         return float(a[0])*a[1]
         
+class Dimension(object):
+    """Class describing dimensions (length, time, mass, and derivative dimensions.)"""
+        
 from functools import total_ordering
 
 @total_ordering
