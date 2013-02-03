@@ -96,11 +96,11 @@ class TestDimension(unittest.TestCase):
         self.assertEqual(d3.Q, 0)
         self.assertEqual(d3.Theta, 0)
         d4 = d1/d2
-        self.assertEqual(d3.M, -2)
-        self.assertEqual(d3.L, 3)
-        self.assertEqual(d3.T, -2)
-        self.assertEqual(d3.Q, 0)
-        self.assertEqual(d3.Theta, 0)
+        self.assertEqual(d4.M, -2)
+        self.assertEqual(d4.L, 3)
+        self.assertEqual(d4.T, -2)
+        self.assertEqual(d4.Q, 0)
+        self.assertEqual(d4.Theta, 0)
         
 
 if __name__ == '__main__':

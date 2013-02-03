@@ -57,3 +57,28 @@ class Dimension(object):
             raise IncompatibleDimensionsError
         else:
             return Dimension(self) # create a copy of self.
+
+    def __mul__(self, other):
+        """Multiplication."""
+        return Dimension(M = self.M + other.M,
+            L = self.L + other.L,
+            T = self.T + other.T,
+            Q = self.Q + other.Q,
+            Theta = self.Theta + other.Theta)
+
+    def __div__(self, other):
+        """Division (when __future__.division is not defined)."""
+        return Dimension(M = self.M - other.M,
+            L = self.L - other.L,
+            T = self.T - other.T,
+            Q = self.Q - other.Q,
+            Theta = self.Theta - other.Theta)
+
+    def __truediv__(self, other):
+        """Division (when __future__.division is defined).."""
+        return Dimension(M = self.M - other.M,
+            L = self.L - other.L,
+            T = self.T - other.T,
+            Q = self.Q - other.Q,
+            Theta = self.Theta - other.Theta)
+
