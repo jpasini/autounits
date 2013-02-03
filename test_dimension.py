@@ -34,31 +34,6 @@ class TestDimension(unittest.TestCase):
         self.assertEqual(d2.Q, 0)
         self.assertEqual(d2.Theta, 0)
     
-    def test_create_from_string(self):
-        """Create dimensions from strings."""
-        d1 = Dimension("L/T")
-        self.assertEqual(d1.M, 0) # mass
-        self.assertEqual(d1.L, 1) # length
-        self.assertEqual(d1.T, -1) # time
-        self.assertEqual(d1.Q, 0) # electric charge
-        self.assertEqual(d1.Theta, 0) # absolute temperature
-        d2 = Dimension("L/T^2")
-        self.assertEqual(d2.M, 0)
-        self.assertEqual(d2.L, 1)
-        self.assertEqual(d2.T, -2)
-        self.assertEqual(d2.Q, 0)
-        self.assertEqual(d2.Theta, 0)
-        d3 = Dimension("Q^2L/T^2/M^4/Theta^3")
-        self.assertEqual(d3.M, -4)
-        self.assertEqual(d3.L, 1)
-        self.assertEqual(d3.T, -2)
-        self.assertEqual(d3.Q, 2)
-        self.assertEqual(d3.Theta, 3)
-        d4 = Dimension("Q^2L/(T^2M^4Theta^3)")
-        self.assertEqual(d3, d4)
-        d5 = Dimension("Q^2 L/(T^2 M^4 Theta^3)")
-        self.assertEqual(d3, d5)        
-        
     def test_for_equality(self):
         """Equality is based on dimension content."""
         d1 = Dimension()

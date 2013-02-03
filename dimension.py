@@ -25,8 +25,6 @@ class Dimension(object):
             self.T = M.T
             self.Q = M.Q
             self.Theta = M.Theta
-        elif type(M) == str:
-            pass
         else:
             self.M = M
             self.L = L
