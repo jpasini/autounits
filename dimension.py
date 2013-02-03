@@ -43,3 +43,17 @@ class Dimension(object):
         """Check for difference."""
         return self.M != other.M or self.L != other.L \
             or self.T != other.T or self.Q != other.Q or self.Theta != other.Theta
+            
+    def __add__(self, other):
+        """Addition: checks for compatibility."""
+        if self != other:
+            raise IncompatibleDimensionsError
+        else:
+            return Dimension(self) # create a copy of self.
+
+    def __sub__(self, other):
+        """Subtraction: checks for compatibility."""
+        if self != other:
+            raise IncompatibleDimensionsError
+        else:
+            return Dimension(self) # create a copy of self.
