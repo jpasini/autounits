@@ -12,25 +12,31 @@ class IncompatibleDimensionsError(DimensionError): pass
 class Dimension(object):
     """Class describing dimensions: length, time, etc. and derivative dimensions."""
     
-    def __init__(self, M = 0, L = 0, T = 0, Q = 0, Theta = 0):
+    def __init__(self, *args, **kwargs):
         """Can be initialized like this:
         Dimension(L = 1, T = -2) using named arguments,
         Dimension(d) using another dimension
-        Dimension("L/T") using a string."""
-        # check the first argument in case it's a different type
-        if type(M) == type(self): # it's a dimension
-            # To do: check that there are no other arguments?
-            self.M = M.M
-            self.L = M.L
-            self.T = M.T
-            self.Q = M.Q
-            self.Theta = M.Theta
-        else:
-            self.M = M
-            self.L = L
-            self.T = T
-            self.Q = Q
-            self.Theta = Theta
+        Dimension("L/T") using a string <== Not yet."""
+        # If args contains something, it should be a dimension
+        if len(args) > 1:
+            raise DimensionError
+        elif len(args) == 1:
+            d = args[0]
+            if type(d) != type(self): # it's not a dimension
+                raise DimensionError
+            if len(kwargs) > 0: # shouldn't have included more inputs
+                raise DimensionError
+            self.M = d.M
+            self.L = d.L
+            self.T = d.T
+            self.Q = d.Q
+            self.Theta = d.Theta
+        else: # len(args) == 0, so I should only have named arguments
+            dims = ['M', 'L', 'T', 'Q', 'Theta']
+            if len(set(kwargs.keys()) - set(dims)) > 0:
+                raise DimensionError
+            for k in dims:
+                self.__dict__[k] = 0 if k not in kwargs else kwargs[k]
             
     def __eq__(self, other):
         """Check for equality."""

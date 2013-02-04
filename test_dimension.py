@@ -1,7 +1,8 @@
 from __future__ import division
 
 import unittest
-from dimension import Dimension, IncompatibleDimensionsError
+from dimension import Dimension
+from dimension import DimensionError, IncompatibleDimensionsError
 
 
 class TestDimension(unittest.TestCase):
@@ -33,6 +34,18 @@ class TestDimension(unittest.TestCase):
         self.assertEqual(d2.T, -1)
         self.assertEqual(d2.Q, 0)
         self.assertEqual(d2.Theta, 0)
+        
+    def test_create_with_bad_input(self):
+        """Create dimensions with bad inputs."""
+        d1 = Dimension(L = 1, T = -1)
+        # too many arguments
+        self.assertRaises(DimensionError, Dimension, d1, d1)
+        # if only one positional argument, it should be a dimension
+        self.assertRaises(DimensionError, Dimension, 4)
+        # if dimension given, nothing else should be there
+        self.assertRaises(DimensionError, Dimension, d1, L=1)
+        # Keyword arguments should only be in L,M,T,Q,Theta
+        self.assertRaises(DimensionError, Dimension, L=1,s=2)
     
     def test_for_equality(self):
         """Equality is based on dimension content."""
