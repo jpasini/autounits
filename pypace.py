@@ -39,7 +39,6 @@ def print_latex_footer():
 \\end{document}'''
     
 if __name__ == "__main__":
-    import sys
     print_latex_header()
     print_table()
     print_latex_footer()

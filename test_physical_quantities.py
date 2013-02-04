@@ -158,21 +158,6 @@ class TestDistance(unittest.TestCase):
         self.assertEqual(d2.m, 2)
         self.assertEqual(d1.m, 10)
         
-class TestCombinedDimensions(unittest.TestCase):
-    """Test combinations of units."""
-    
-    def test_combined_units(self):
-        d = Distance("10m")
-        t = Time("5s")
-        self.assertRaises(IncompatibleUnitsError, d.__lt__, t)
-        self.assertRaises(IncompatibleUnitsError, d.__gt__, t)
-        self.assertRaises(IncompatibleUnitsError, d.__le__, t)
-        self.assertRaises(IncompatibleUnitsError, d.__ge__, t)
-        # addition and subtraction
-        self.assertRaises(IncompatibleUnitsError, d.__add__, t)
-        self.assertRaises(IncompatibleUnitsError, d.__sub__, t)
-        
-        
 class TestTime(unittest.TestCase):
     """Tests for the Time class."""
     seconds_in = {'s': 1, 'seconds': 1, 'min': 60, 'minutes': 60, 'hr': 3600, 'hours': 3600 }
@@ -224,7 +209,22 @@ class TestSpeed(unittest.TestCase):
         for speed, distance, pace in self.known_values:
             s, d, t = Speed(speed), Distance(distance), Time(pace)
             self.assertEqual(s.pace(d).s, t.s) # the seconds should be correct
-                    
 
+
+class TestCombinedDimensions(unittest.TestCase):
+    """Test combinations of units."""
+    
+    def test_combined_units(self):
+        d = Distance("10m")
+        t = Time("5s")
+        self.assertRaises(IncompatibleUnitsError, d.__lt__, t)
+        self.assertRaises(IncompatibleUnitsError, d.__gt__, t)
+        self.assertRaises(IncompatibleUnitsError, d.__le__, t)
+        self.assertRaises(IncompatibleUnitsError, d.__ge__, t)
+        # addition and subtraction
+        self.assertRaises(IncompatibleUnitsError, d.__add__, t)
+        self.assertRaises(IncompatibleUnitsError, d.__sub__, t)
+        
+        
 if __name__ == '__main__':
     unittest.main()
