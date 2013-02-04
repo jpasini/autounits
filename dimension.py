@@ -17,7 +17,7 @@ class Dimension(object):
         Dimension(L = 1, T = -2) using named arguments,
         Dimension(d) using another dimension
         Dimension("L/T") using a string <== Not yet."""
-        dims = ['M', 'L', 'T', 'Q', 'Theta']
+        dimensions_considered = ['M', 'L', 'T', 'Q', 'Theta']
         # If args contains something, it should be a dimension
         if len(args) > 1:
             raise DimensionError
@@ -27,12 +27,12 @@ class Dimension(object):
                 raise DimensionError
             if len(kwargs) > 0: # shouldn't have included more inputs
                 raise DimensionError
-            for k in dims:
+            for k in dimensions_considered:
                 self.__dict__[k] = d.__dict__[k]
         else: # len(args) == 0, so I should only have named arguments
-            if len(set(kwargs.keys()) - set(dims)) > 0:
+            if len(set(kwargs.keys()) - set(dimensions_considered)) > 0:
                 raise DimensionError
-            for k in dims:
+            for k in dimensions_considered:
                 self.__dict__[k] = 0 if k not in kwargs else kwargs[k]
             
     def __eq__(self, other):
