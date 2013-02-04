@@ -2,7 +2,8 @@ from __future__ import division
 
 import unittest
 from physical_quantities import PhysicalQuantity, Distance, Time, Speed
-from physical_quantities import PhysicalQuantityStringParser, BadInputError, BadUnitDictionaryError
+from physical_quantities import PhysicalQuantityStringParser, \
+    BadInputError, BadUnitDictionaryError, IncompatibleUnitsError
 
 
 class TestQuantityStringParser(unittest.TestCase):
@@ -156,6 +157,20 @@ class TestDistance(unittest.TestCase):
         d2.m = 2
         self.assertEqual(d2.m, 2)
         self.assertEqual(d1.m, 10)
+        
+class TestCombinedDimensions(unittest.TestCase):
+    """Test combinations of units."""
+    
+    def test_combined_units(self):
+        d = Distance("10m")
+        t = Time("5s")
+        self.assertRaises(IncompatibleUnitsError, d.__lt__, t)
+        self.assertRaises(IncompatibleUnitsError, d.__gt__, t)
+        self.assertRaises(IncompatibleUnitsError, d.__le__, t)
+        self.assertRaises(IncompatibleUnitsError, d.__ge__, t)
+        # addition and subtraction
+        self.assertRaises(IncompatibleUnitsError, d.__add__, t)
+        self.assertRaises(IncompatibleUnitsError, d.__sub__, t)
         
         
 class TestTime(unittest.TestCase):

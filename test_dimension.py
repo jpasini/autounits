@@ -76,7 +76,7 @@ class TestDimension(unittest.TestCase):
         self.assertEqual(d4.T, -2)
         self.assertEqual(d4.Q, 0)
         self.assertEqual(d4.Theta, 0)
-        
+
 
 if __name__ == '__main__':
     unittest.main()

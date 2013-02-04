@@ -8,7 +8,7 @@ from __future__ import division
 class PhysicalQuantityError(Exception): pass
 class BadInputError(PhysicalQuantityError): pass
 class BadUnitDictionaryError(PhysicalQuantityError): pass
-class IncompatibleUnits(PhysicalQuantityError): pass
+class IncompatibleUnitsError(PhysicalQuantityError): pass
 
 class PhysicalQuantityStringParser(object):
     """Object that parses a string representing an amount with units."""
@@ -95,28 +95,28 @@ class PhysicalQuantity(object):
                 
     def __eq__(self, other):
         """Equality is defined by the type and amount."""
-        if type(self) != type(other):
-            raise IncompatibleUnits
-        return self._amount_in_basic_units == other._amount_in_basic_units
+        return type(self) == type(other) and self._amount_in_basic_units == other._amount_in_basic_units
     
     def __ne__(self, other):
         """Equality is defined by the type and amount."""
-        if type(self) != type(other):
-            raise IncompatibleUnits
-        return self._amount_in_basic_units != other._amount_in_basic_units
+        return type(self) != type(other) or self._amount_in_basic_units != other._amount_in_basic_units
     
     def __lt__(self, other):
         """Less-than comparison."""
         if type(self) != type(other):
-            raise IncompatibleUnits
+            raise IncompatibleUnitsError
         return self._amount_in_basic_units < other._amount_in_basic_units
     
     def __add__(self, other):
+        if type(self) != type(other):
+            raise IncompatibleUnitsError        
         result = type(self)() # Derived classes should initialize without arguments
         result._amount_in_basic_units = self._amount_in_basic_units + other._amount_in_basic_units
         return result
         
     def __sub__(self, other):
+        if type(self) != type(other):
+            raise IncompatibleUnitsError        
         result = type(self)() # Derived classes should initialize without arguments
         result._amount_in_basic_units = self._amount_in_basic_units - other._amount_in_basic_units
         return result
