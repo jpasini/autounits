@@ -107,7 +107,8 @@ class TestPhysicalQuantity(unittest.TestCase):
         self.assertTrue(p1 != p2)
         self.assertFalse(p1 > p2)
         self.assertTrue(p1 < p2)
-
+        
+# Test primitive quantities
         
 class TestDistance(unittest.TestCase):
     """Tests for the Distance class."""
@@ -186,7 +187,8 @@ class TestTime(unittest.TestCase):
         t = Time("0.1 s")
         self.assertEqual(t.str, "00:00")
         
-        
+# Test derived quantities
+    
 class TestSpeed(unittest.TestCase):
     """Tests for the Speed class."""
     # speed, distance for pace, pace
@@ -214,16 +216,28 @@ class TestSpeed(unittest.TestCase):
 class TestCombinedDimensions(unittest.TestCase):
     """Test combinations of units."""
     
-    def test_combined_units(self):
+    def test_comparison_of_combined_units(self):
         d = Distance("10m")
         t = Time("5s")
+        self.assertFalse(d.dimension == t.dimension)
         self.assertRaises(IncompatibleUnitsError, d.__lt__, t)
         self.assertRaises(IncompatibleUnitsError, d.__gt__, t)
         self.assertRaises(IncompatibleUnitsError, d.__le__, t)
         self.assertRaises(IncompatibleUnitsError, d.__ge__, t)
-        # addition and subtraction
+        
+    def test_addition_and_subtraction_of_combined_units(self):
+        d = Distance("10m")
+        t = Time("5s")
         self.assertRaises(IncompatibleUnitsError, d.__add__, t)
         self.assertRaises(IncompatibleUnitsError, d.__sub__, t)
+        
+    def test_multiplication_and_division_of_combined_units(self):
+        d = Distance("10m")
+        t = Time("5s")
+        s1 = d/t
+        s2 = Speed("2m/s")
+        self.assertEqual(s1.dimension, s2.dimension)
+        self.assertEqual(s1, s2)
         
         
 if __name__ == '__main__':

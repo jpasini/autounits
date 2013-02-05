@@ -10,6 +10,8 @@ class BadInputError(PhysicalQuantityError): pass
 class BadUnitDictionaryError(PhysicalQuantityError): pass
 class IncompatibleUnitsError(PhysicalQuantityError): pass
 
+from dimension import Dimension
+
 class PhysicalQuantityStringParser(object):
     """Object that parses a string representing an amount with units."""
     def __init__(self, units_dictionary):
@@ -127,6 +129,7 @@ class Distance(PhysicalQuantity):
         # Conversion constants
         meters_in = {('m', 'meters'): 1, ('mi', 'miles'): 1609.344, ('km', 'kilometers'): 1000, 'marathon': 42194.988 }
         PhysicalQuantity.__init__(self, meters_in, value)
+        self.dimension = Dimension(L = 1)
 
 
 class Time(PhysicalQuantity):
@@ -134,6 +137,7 @@ class Time(PhysicalQuantity):
         # Conversion constants
         secs_in = {('s', 'seconds'): 1, ('min', 'minutes'): 60, ('hr', 'hours'): 3600 }
         PhysicalQuantity.__init__(self, secs_in, value)
+        self.dimension = Dimension(T = 1)
         
     @property
     def str(self):
@@ -155,6 +159,7 @@ class Speed(PhysicalQuantity):
         # Conversion constants
         mps_in = {('mps', 'm/s'): 1, 'mph': Distance('1 mi').m/Time('1 hr').s }
         PhysicalQuantity.__init__(self, mps_in, value)
+        self.dimension = Dimension(L = 1, T = -1)
         
     def pace(self, distance):
         """Return time to cover given distance."""
