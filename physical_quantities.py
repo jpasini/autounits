@@ -94,6 +94,12 @@ class PhysicalQuantity(object):
             getter = make_getter(yardstick)
             setter = make_setter(yardstick)
             setattr(self.__class__, unit_name, property(getter, setter))
+            
+    def __getitem__(self, key):
+        return self._amount_in_basic_units/self._parser.flat_units_dictionary[key]
+                
+    def __setitem__(self, key, value):
+        self._amount_in_basic_units = value*self._parser.flat_units_dictionary[key]
                 
     def __eq__(self, other):
         """Equality is defined by the type and amount."""
