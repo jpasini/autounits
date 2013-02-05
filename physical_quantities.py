@@ -83,18 +83,6 @@ class PhysicalQuantity(object):
             elif type(value) == type(self):
                 self._amount_in_basic_units = value._amount_in_basic_units
         
-        # Add the getter/setter properties for each unit
-        def make_getter(yardstick):
-            return lambda s: s._amount_in_basic_units/yardstick
-            
-        def make_setter(yardstick):
-            return lambda s,val: setattr(s,'_amount_in_basic_units', val*yardstick)
-            
-        for unit_name, yardstick in self._parser.flat_units_dictionary.iteritems():
-            getter = make_getter(yardstick)
-            setter = make_setter(yardstick)
-            setattr(self.__class__, unit_name, property(getter, setter))
-            
     def __getitem__(self, key):
         return self._amount_in_basic_units/self._parser.flat_units_dictionary[key]
                 
@@ -147,12 +135,12 @@ class Time(PhysicalQuantity):
         
     @property
     def str(self):
-        secs = self.s
+        secs = self['s']
         h, m = Time("1 hr"), Time("1 min")
-        hours = int(secs/h.s)
-        secs = secs - hours*h.s
-        mins = int(secs/m.s)
-        secs = int(secs - mins*m.s)
+        hours = int(secs/h['s'])
+        secs = secs - hours*h['s']
+        mins = int(secs/m['s'])
+        secs = int(secs - mins*m['s'])
         result = ""
         if hours > 0:
             result = result + str(hours) + ":"
@@ -163,13 +151,13 @@ class Time(PhysicalQuantity):
 class Speed(PhysicalQuantity):
     def __init__(self, value = None):
         # Conversion constants
-        mps_in = {('mps', 'm/s'): 1, 'mph': Distance('1 mi').m/Time('1 hr').s }
+        mps_in = {('mps', 'm/s'): 1, 'mph': Distance('1 mi')['m']/Time('1 hr')['s'] }
         PhysicalQuantity.__init__(self, mps_in, value)
         self.dimension = Dimension(L = 1, T = -1)
         
     def pace(self, distance):
         """Return time to cover given distance."""
         t = Time()
-        t.s = distance.m/self.mps
+        t['s'] = distance['m']/self['mps']
         return t
         
