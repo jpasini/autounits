@@ -46,6 +46,21 @@ class TestDimension(unittest.TestCase):
         self.assertRaises(DimensionError, Dimension, d1, L=1)
         # Keyword arguments should only be in L,M,T,Q,Theta
         self.assertRaises(DimensionError, Dimension, L=1,s=2)
+        
+    def test_for_primitive_dimension(self):
+        """Some dimensions may be 'primitive'."""
+        # Primitive dimensions
+        self.assertTrue(Dimension().is_primitive()) # convention: dimensionless is primitive
+        self.assertTrue(Dimension(M=1).is_primitive())
+        self.assertTrue(Dimension(L=1).is_primitive())
+        self.assertTrue(Dimension(T=1).is_primitive())
+        self.assertTrue(Dimension(Q=1).is_primitive())
+        self.assertTrue(Dimension(Theta=1).is_primitive())
+        # Derived dimensions
+        self.assertFalse(Dimension(M=2).is_primitive())
+        self.assertFalse(Dimension(L=1,T=1).is_primitive())
+        self.assertFalse(Dimension(L=1,T=-1).is_primitive())
+        self.assertFalse(Dimension(T=-1).is_primitive())
     
     def test_for_equality(self):
         """Equality is based on dimension content."""
