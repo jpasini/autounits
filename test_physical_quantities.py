@@ -65,29 +65,29 @@ class TestPhysicalQuantity(unittest.TestCase):
         """Simple physical quantities without synonyms."""
         meters_in = {'m' : 1, 'mm': 0.001, 'km': 1000}
         p = PhysicalQuantity(meters_in, "2m")
-        self.assertEqual(p.m, 2)
-        self.assertEqual(p.mm, 2000)
-        self.assertEqual(p.km, 0.002)
-        p.m = 1000
-        self.assertEqual(p.m, 1000)
-        self.assertEqual(p.mm, 1000000)
-        self.assertEqual(p.km, 1)
+        self.assertEqual(p['m'], 2)
+        self.assertEqual(p['mm'], 2000)
+        self.assertEqual(p['km'], 0.002)
+        p['m'] = 1000
+        self.assertEqual(p['m'], 1000)
+        self.assertEqual(p['mm'], 1000000)
+        self.assertEqual(p['km'], 1)
 
     def test_create_physical_quantity_with_synonyms(self):
         """Test physical quantities with synonyms."""
         meters_in = {('m', 'meters') : 1, 'mm': 0.001, ('km','kilometers'): 1000}
         p = PhysicalQuantity(meters_in, "3m")
-        self.assertEqual(p.m, 3)
-        self.assertEqual(p.meters, 3)
-        self.assertEqual(p.mm, 3000)
-        self.assertEqual(p.km, 0.003)
-        self.assertEqual(p.kilometers, 0.003)
-        p.km = 2
-        self.assertEqual(p.m, 2000)
-        self.assertEqual(p.meters, 2000)
-        self.assertEqual(p.mm, 2000000)
-        self.assertEqual(p.km, 2)
-        self.assertEqual(p.kilometers, 2)
+        self.assertEqual(p['m'], 3)
+        self.assertEqual(p['meters'], 3)
+        self.assertEqual(p['mm'], 3000)
+        self.assertEqual(p['km'], 0.003)
+        self.assertEqual(p['kilometers'], 0.003)
+        p['km'] = 2
+        self.assertEqual(p['m'], 2000)
+        self.assertEqual(p['meters'], 2000)
+        self.assertEqual(p['mm'], 2000000)
+        self.assertEqual(p['km'], 2)
+        self.assertEqual(p['kilometers'], 2)
         
     def test_comparisons(self):
         """All comparisons should be available between quantities of the same type."""
@@ -100,7 +100,7 @@ class TestPhysicalQuantity(unittest.TestCase):
         self.assertFalse(p1 != p2)
         self.assertFalse(p1 < p2)
         self.assertFalse(p1 > p2)
-        p2.km = 1
+        p2['km'] = 1
         self.assertFalse(p1 == p2)
         self.assertFalse(p1 >= p2)
         self.assertTrue(p1 <= p2)
@@ -118,14 +118,13 @@ class TestDistance(unittest.TestCase):
         """Simple distances."""
         for unit,meters in self.meters_in.iteritems():
             d = Distance('1' + unit) # create "1x" where x is the unit
-            self.assertEqual(d.m, meters) # the meters should be correct
+            self.assertEqual(d['m'], meters) # the meters should be correct
             
     def test_consistency(self):
         """In its own units, the value should be 1."""
         for unit in self.meters_in.keys():
             d = Distance('1' + unit) # create "1x" where x is the unit
-            evaluate_in_own_units = getattr(d, unit)
-            self.assertEqual(evaluate_in_own_units, 1)
+            self.assertEqual(d[unit], 1)
             
     def test_distance_adding(self):
         """Test adding distances."""
@@ -133,7 +132,7 @@ class TestDistance(unittest.TestCase):
         d2 = Distance("3 km")
         d3 = d1 + d2
         self.assertEqual(type(d1), type(d3)) # type is the same
-        self.assertEqual(d3.m, 3010)
+        self.assertEqual(d3['m'], 3010)
         
     def test_distance_subtracting(self):
         """Test subtracting distances."""
@@ -141,13 +140,13 @@ class TestDistance(unittest.TestCase):
         d2 = Distance("3 km")
         d3 = d2 - d1
         self.assertEqual(type(d1), type(d3)) # type is the same
-        self.assertEqual(d3.m, 2990)
+        self.assertEqual(d3['m'], 2990)
         
     def test_for_distance_equality(self):
         """Test that distances are only compared by length."""
         d1 = Distance("1m")
         d2 = Distance("0.001km")
-        self.assertEqual(d1.m, d2.m) # sanity check before the real test
+        self.assertEqual(d1['m'], d2['m']) # sanity check before the real test
         self.assertEqual(d1, d2)
         
     def test_creating_from_other_distance(self):
@@ -155,9 +154,9 @@ class TestDistance(unittest.TestCase):
         d1 = Distance("10 m")
         d2 = Distance(d1)
         self.assertEqual(d1, d2)
-        d2.m = 2
-        self.assertEqual(d2.m, 2)
-        self.assertEqual(d1.m, 10)
+        d2['m'] = 2
+        self.assertEqual(d2['m'], 2)
+        self.assertEqual(d1['m'], 10)
         
 class TestTime(unittest.TestCase):
     """Tests for the Time class."""
@@ -167,14 +166,13 @@ class TestTime(unittest.TestCase):
         """Simple times."""
         for unit,seconds in self.seconds_in.iteritems():
             t = Time('1' + unit) # create "1x" where x is the unit
-            self.assertEqual(t.s, seconds) # the seconds should be correct
+            self.assertEqual(t['s'], seconds) # the seconds should be correct
             
     def test_consistency(self):
         """In its own units, the value should be 1."""
         for unit in self.seconds_in.keys():
             t = Time('1' + unit) # create "1x" where x is the unit
-            evaluate_in_own_units = getattr(t, unit)
-            self.assertEqual(evaluate_in_own_units, 1)
+            self.assertEqual(t[unit], 1)
             
     def test_string_output(self):
         """Test time output in string format."""
@@ -201,16 +199,16 @@ class TestSpeed(unittest.TestCase):
     def test_simple_speeds(self):
         """Create a few speeds and check the value."""
         s = Speed('1 mph')
-        self.assertEqual(s.mph, 1)
-        s.mph = 2.5
-        self.assertEqual(s.mph, 2.5)
-        self.assertEqual(s.mps, 2.5*Distance('1mi').m/Time('1hr').s)
+        self.assertEqual(s['mph'], 1)
+        s['mph'] = 2.5
+        self.assertEqual(s['mph'], 2.5)
+        self.assertEqual(s['mps'], 2.5*Distance('1mi')['m']/Time('1hr')['s'])
 
     def test_check_known_pace(self):
         """Check pace for some speeds."""
         for speed, distance, pace in self.known_values:
             s, d, t = Speed(speed), Distance(distance), Time(pace)
-            self.assertEqual(s.pace(d).s, t.s) # the seconds should be correct
+            self.assertEqual(s.pace(d)['s'], t['s']) # the seconds should be correct
 
 
 class TestCombinedDimensions(unittest.TestCase):
