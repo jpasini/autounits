@@ -76,6 +76,7 @@ class TestDimension(unittest.TestCase):
         self.assertEqual(Dimension(T = -0.5).str(), "1/T^0.5")
         self.assertEqual(Dimension(L = 1, T = -0.5).str(), "L/T^0.5")
         self.assertEqual(Dimension(M = 2, L = 1, T = -0.5).str(), "M^2L/T^0.5")
+        self.assertEqual(Dimension(M = -2, L = 1, T = -0.5).str(), "L/M^2/T^0.5")
     
     def test_for_equality(self):
         """Equality is based on dimension content."""

@@ -48,24 +48,23 @@ class Dimension(object):
         return number_of_nonzeros_and_nonones == 0 and number_of_ones in [0, 1]
     
     def str(self):
-        result = ""
+        numerator = ""
+        denominator = ""
         for k in self._dimensions_considered:
             v = self.__dict__[k]
             if v == 0:
                 continue
             if v == 1:
-                result += "%s" % k
+                numerator += "%s" % k
             elif v == -1:
-                result += "/%s" % k
+                denominator += "/%s" % k
             elif v > 0:
-                result += "%s^%s" % (k, v)
+                numerator += "%s^%s" % (k, v)
             else:
-                result += "/%s^%s" % (k, -v)
-        if result == "":
-            result = "1"
-        elif result[0] == "/":
-            result = "1" + result
-        return result
+                denominator += "/%s^%s" % (k, -v)
+        if numerator == "":
+            numerator = "1"
+        return numerator + denominator
             
     def __eq__(self, other):
         """Check for equality."""
