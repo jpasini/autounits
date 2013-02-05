@@ -131,7 +131,7 @@ class TestDistance(unittest.TestCase):
         d1 = Distance("10 m")
         d2 = Distance("3 km")
         d3 = d1 + d2
-        self.assertEqual(type(d1), type(d3)) # type is the same
+        self.assertEqual(d1.dimension, d3.dimension) # type is the same
         self.assertEqual(d3['m'], 3010)
         
     def test_distance_subtracting(self):
@@ -139,7 +139,7 @@ class TestDistance(unittest.TestCase):
         d1 = Distance("10 m")
         d2 = Distance("3 km")
         d3 = d2 - d1
-        self.assertEqual(type(d1), type(d3)) # type is the same
+        self.assertEqual(d1.dimension, d3.dimension) # type is the same
         self.assertEqual(d3['m'], 2990)
         
     def test_for_distance_equality(self):
