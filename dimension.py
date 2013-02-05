@@ -66,6 +66,25 @@ class Dimension(object):
             numerator = "1"
         return numerator + denominator
             
+    def str_for_replacement(self):
+        numerator = ""
+        denominator = ""
+        for k in self._dimensions_considered:
+            v = self.__dict__[k]
+            if v == 0:
+                continue
+            if v == 1:
+                numerator += "{%s}" % k
+            elif v == -1:
+                denominator += "/{%s}" % k
+            elif v > 0:
+                numerator += "{%s}^%s" % (k, v)
+            else:
+                denominator += "/{%s}^%s" % (k, -v)
+        if numerator == "":
+            numerator = "1"
+        return numerator + denominator
+            
     def __eq__(self, other):
         """Check for equality."""
         return self.M == other.M and self.L == other.L \
