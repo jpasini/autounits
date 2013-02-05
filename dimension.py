@@ -46,6 +46,26 @@ class Dimension(object):
             elif p != 0:
                 number_of_nonzeros_and_nonones += 1
         return number_of_nonzeros_and_nonones == 0 and number_of_ones in [0, 1]
+    
+    def str(self):
+        result = ""
+        for k in self._dimensions_considered:
+            v = self.__dict__[k]
+            if v == 0:
+                continue
+            if v == 1:
+                result += "%s" % k
+            elif v == -1:
+                result += "/%s" % k
+            elif v > 0:
+                result += "%s^%s" % (k, v)
+            else:
+                result += "/%s^%s" % (k, -v)
+        if result == "":
+            result = "1"
+        elif result[0] == "/":
+            result = "1" + result
+        return result
             
     def __eq__(self, other):
         """Check for equality."""

@@ -61,6 +61,21 @@ class TestDimension(unittest.TestCase):
         self.assertFalse(Dimension(L=1,T=1).is_primitive())
         self.assertFalse(Dimension(L=1,T=-1).is_primitive())
         self.assertFalse(Dimension(T=-1).is_primitive())
+        
+    def test_string_representation(self):
+        self.assertEqual(Dimension().str(), "1")
+        self.assertEqual(Dimension(M = 1).str(), "M")
+        self.assertEqual(Dimension(L = 1).str(), "L")
+        self.assertEqual(Dimension(T = 1).str(), "T")
+        self.assertEqual(Dimension(Q = 1).str(), "Q")
+        self.assertEqual(Dimension(Theta = 1).str(), "Theta")
+        self.assertEqual(Dimension(M = 2).str(), "M^2")
+        self.assertEqual(Dimension(L = 1, T = 1).str(), "LT")
+        self.assertEqual(Dimension(L = 1, T = -1).str(), "L/T")
+        self.assertEqual(Dimension(T = -1).str(), "1/T")
+        self.assertEqual(Dimension(T = -0.5).str(), "1/T^0.5")
+        self.assertEqual(Dimension(L = 1, T = -0.5).str(), "L/T^0.5")
+        self.assertEqual(Dimension(M = 2, L = 1, T = -0.5).str(), "M^2L/T^0.5")
     
     def test_for_equality(self):
         """Equality is based on dimension content."""
