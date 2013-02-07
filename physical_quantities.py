@@ -93,10 +93,9 @@ class PhysicalQuantityStringParser(object):
         
 from functools import total_ordering
 
-parsers = {}
-
 @total_ordering
 class PhysicalQuantity(object):
+    parsers = {}
     
     def __init__(self, dimension = Dimension(), value = None):
         if type(dimension) != Dimension:
@@ -105,16 +104,17 @@ class PhysicalQuantity(object):
         self.dimension = dimension
         # Conversion constants for primitive quantities
         self._primitive_units = {}
-        self._primitive_units['M'] = {'kg': 1}
-        self._primitive_units['L'] = {('m', 'meters'): 1, ('mi', 'miles'): 1609.344, ('km', 'kilometers'): 1000, 'marathon': 42194.988}
-        self._primitive_units['T'] = {('s', 'seconds'): 1, ('min', 'minutes'): 60, ('hr', 'hours'): 3600}
-        self._primitive_units['Q'] = {'C': 1}
-        self._primitive_units['Theta'] = {'K': 1}
+        self._primitive_units['M'] = {('kg', 'kilogram', 'kilograms'): 1, ('g', 'gr', 'gram', 'grams'): 0.001}
+        self._primitive_units['L'] = {('m', 'meter', 'meters'): 1, ('mi', 'mile', 'miles'): 1609.344, ('km', 'kilometer', 'kilometers'): 1000, 'marathon': 42194.988}
+        self._primitive_units['T'] = {('s', 'sec', 'secs', 'second', 'seconds'): 1, ('min', 'mins', 'minute', 'minutes'): 60, ('hr', 'hrs', 'hour', 'hours'): 3600}
+        self._primitive_units['Q'] = {('C', 'coulomb'): 1}
+        self._primitive_units['Theta'] = {('K', 'kelvin'): 1, ('R', 'rankine'): 5/9}
         
+        # create the parser if it doesn't exist already. Index by string representation
         dimension_str = dimension.str()
-        if dimension_str not in parsers.keys():
-            parsers[dimension_str] = PhysicalQuantityStringParser(dimension, self._primitive_units) 
-        self._parser = parsers[dimension_str]
+        if dimension_str not in PhysicalQuantity.parsers.keys():
+            PhysicalQuantity.parsers[dimension_str] = PhysicalQuantityStringParser(dimension, self._primitive_units) 
+        self._parser = PhysicalQuantity.parsers[dimension_str]
         
         self._amount_in_basic_units = None
         if value is not None:
