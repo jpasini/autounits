@@ -49,9 +49,19 @@ class TestDistance(unittest.TestCase):
         
     def test_create_simple_distances(self):
         """Simple distances."""
+        # Check consistency
         for unit,meters in self.meters_in.iteritems():
             d = Distance('1' + unit) # create "1x" where x is the unit
             self.assertEqual(d['m'], meters) # the meters should be correct
+        # Check creating from other distances
+        d1 = Distance("1 m")
+        d2 = Distance(d1)
+        self.assertEqual(d1['m'], d2['m'])
+        # Check creating from another quantity with same dimensions
+        d1 = PhysicalQuantity(Dimension(L = 1), "1 m")
+        d2 = Distance(d1)
+        self.assertEqual(d1['m'], d2['m'])
+        
             
     def test_consistency(self):
         """In its own units, the value should be 1."""

@@ -120,7 +120,7 @@ class PhysicalQuantity(object):
         if value is not None:
             if type(value) == str:
                 self._amount_in_basic_units = self._parser(value)
-            elif type(value) == type(self):
+            else:
                 if self.dimension != value.dimension:
                     raise IncompatibleUnitsError
                 self._amount_in_basic_units = value._amount_in_basic_units
@@ -206,6 +206,5 @@ class Speed(PhysicalQuantity):
         
     def pace(self, distance):
         """Return time to cover given distance."""
-        t = distance/self
-        return t
+        return Time(distance / self)
         
