@@ -38,46 +38,6 @@ def flatten_dictionary(units_dictionary):
 
 class PhysicalQuantityStringParser(object):
     """Object that parses a string representing an amount with units."""
-    def __init__(self, units_dictionary):
-        """Define a parser based on the given units_dictionary.
-        For example, for distances you would use:
-        
-        units_dictionary = {('m', 'meters'): 1, 'mi': 1609.344}
-        
-        """
-        new_dictionary = flatten_dictionary(units_dictionary)
-        self.flat_units_dictionary = new_dictionary
-        
-        from pyparsing import Literal, replaceWith, \
-            Or, nums, Word, stringEnd, ParseException
-        
-        def make_literal(unit_string, val):
-            return Literal(unit_string).setParseAction(replaceWith(val))
-        units = Or( [ make_literal(s,v) for s,v in new_dictionary.iteritems() ] )
-        
-        def validate_and_convert_number(tokens):
-            try:
-                return float(tokens[0])
-            except ValueError:
-                raise ParseException("Invalid number (%s)" % tokens[0])
-        number = Word(nums + 'e' + '-' + '+' + '.')
-        number.setParseAction(validate_and_convert_number)
-        
-        self._dimension = number + units + stringEnd
-        
-    def __call__(self, quantity_string):
-        """Parse the given string."""
-        from pyparsing import ParseException
-        try:
-            a = self._dimension.parseString(quantity_string)
-        except ParseException:
-            raise BadInputError
-        return a[0]*a[1]
-
-
-
-class NewPhysicalQuantityStringParser(object):
-    """Object that parses a string representing an amount with units."""
     def __init__(self, dimension, primitive_units_dictionaries):
         # To-do: Check if dimensionless quantities can receive a string
         
@@ -148,7 +108,7 @@ class PhysicalQuantity(object):
         self._primitive_units['Q'] = {'C': 1}
         self._primitive_units['Theta'] = {'K': 1}
         
-        self._parser = NewPhysicalQuantityStringParser(dimension, self._primitive_units)
+        self._parser = PhysicalQuantityStringParser(dimension, self._primitive_units)
         
         ## Create parsers for all primitive units.
         #self._parsers = {k: PhysicalQuantityStringParser(v) for k,v in self._primitive_units.iteritems()}

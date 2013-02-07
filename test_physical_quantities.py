@@ -2,61 +2,8 @@ from __future__ import division
 
 import unittest
 from physical_quantities import PhysicalQuantity, Distance, Time, Speed
-from physical_quantities import PhysicalQuantityStringParser, \
-    BadInputError, BadUnitDictionaryError, IncompatibleUnitsError
+from physical_quantities import BadInputError, BadUnitDictionaryError, IncompatibleUnitsError
 from dimension import Dimension
-
-
-class TestQuantityStringParser(unittest.TestCase):
-    """Tests for the string parser for physical quantities."""
-    
-    def test_for_bad_dictionary(self):
-        """Units with overlapping names raise exceptions."""
-        # repeated units in different parts
-        units_dict = {('m','meter','meters'): 1, 'km': 1000, ('m','mi','mile'): 1600}
-        self.assertRaises(BadUnitDictionaryError, PhysicalQuantityStringParser, units_dict)
-    
-    def test_flattened_dictionary(self):
-        meters_in = {('m', 'meter') : 1, 'mm': 0.001, ('km', 'kms'): 1000}
-        p = PhysicalQuantityStringParser(meters_in)
-        self.assertEqual(p.flat_units_dictionary, {'m': 1, 'meter': 1, 'mm': 0.001, 'km': 1000, 'kms': 1000})
-    
-    def test_simple_parser(self):
-        meters_in = {('m', 'meter', 'meters') : 1, 'mm': 0.001, ('km', 'kilometers', 'kms'): 1000}
-        p = PhysicalQuantityStringParser(meters_in)
-        """Test simple cases """
-        # The results are in meters because that was the basic unit.
-        self.assertEqual(p('3mm'), 0.003)
-        self.assertEqual(p('1 m'), 1)
-        self.assertEqual(p(' 1 m'), 1) # spaces are ignored
-        self.assertEqual(p('1 m '), 1)
-        self.assertEqual(p('2 meter'), 2)
-        self.assertEqual(p('2 meters'), 2)
-        self.assertEqual(p('2.5km'), 2500) # spaces ignored
-        self.assertEqual(p('0.1 kms'), 100)
-        self.assertEqual(p('.3 kms'), 300)
-        self.assertEqual(p('1. kms'), 1000)
-        self.assertEqual(p('1e-3 kms'), 1)
-        self.assertEqual(p('1.2e-2 kms'), 12)
-        self.assertEqual(p('1.2e2 m'), 120)
-        self.assertEqual(p('1.2e+2 m'), 120)
-        
-    def test_for_bad_inputs(self):
-        meters_in = {('m', 'meter') : 1, 'mm': 0.001, ('km', 'kilometers', 'kms'): 1000}
-        p = PhysicalQuantityStringParser(meters_in)
-        """Test for inputs that should raise exceptions."""
-        self.assertRaises(BadInputError, p, '1 Km') # case sensitive
-        self.assertRaises(BadInputError, p, '1 1 m') # too many numbers
-        # extra input after valid input
-        self.assertRaises(BadInputError, p, '1 m m') # too many units
-        self.assertRaises(BadInputError, p, '1 m 1')
-        self.assertRaises(BadInputError, p, '1.1.1 m') # bad number
-        # Unknown unit that matches a valid entry with extras
-        self.assertRaises(BadInputError, p, '4 meters')
-        self.assertRaises(BadInputError, p, '1 mile')
-        self.assertRaises(BadInputError, p, 'm 3') # bad order
-        self.assertRaises(BadInputError, p, '1e -3 kms')
-        self.assertRaises(BadInputError, p, '1.2ee-3 kms')
 
 
 class TestPhysicalQuantity(unittest.TestCase):
