@@ -95,26 +95,26 @@ from functools import total_ordering
 
 @total_ordering
 class PhysicalQuantity(object):
-    parsers = {}
+    _parsers = {}
+    # Conversion constants for primitive quantities
+    _primitive_units = {}
+    _primitive_units['M'] = {('kg', 'kilogram', 'kilograms'): 1, ('g', 'gr', 'gram', 'grams'): 0.001}
+    _primitive_units['L'] = {('m', 'meter', 'meters'): 1, ('mi', 'mile', 'miles'): 1609.344, ('km', 'kilometer', 'kilometers'): 1000, 'marathon': 42194.988}
+    _primitive_units['T'] = {('s', 'sec', 'secs', 'second', 'seconds'): 1, ('min', 'mins', 'minute', 'minutes'): 60, ('hr', 'hrs', 'hour', 'hours'): 3600}
+    _primitive_units['Q'] = {('C', 'coulomb'): 1}
+    _primitive_units['Theta'] = {('K', 'kelvin'): 1, ('R', 'rankine'): 5/9}
     
     def __init__(self, dimension = Dimension(), value = None):
         if type(dimension) != Dimension:
             raise PhysicalQuantityError
 
         self.dimension = dimension
-        # Conversion constants for primitive quantities
-        self._primitive_units = {}
-        self._primitive_units['M'] = {('kg', 'kilogram', 'kilograms'): 1, ('g', 'gr', 'gram', 'grams'): 0.001}
-        self._primitive_units['L'] = {('m', 'meter', 'meters'): 1, ('mi', 'mile', 'miles'): 1609.344, ('km', 'kilometer', 'kilometers'): 1000, 'marathon': 42194.988}
-        self._primitive_units['T'] = {('s', 'sec', 'secs', 'second', 'seconds'): 1, ('min', 'mins', 'minute', 'minutes'): 60, ('hr', 'hrs', 'hour', 'hours'): 3600}
-        self._primitive_units['Q'] = {('C', 'coulomb'): 1}
-        self._primitive_units['Theta'] = {('K', 'kelvin'): 1, ('R', 'rankine'): 5/9}
         
         # create the parser if it doesn't exist already. Index by string representation
         dimension_str = dimension.str()
-        if dimension_str not in PhysicalQuantity.parsers.keys():
-            PhysicalQuantity.parsers[dimension_str] = PhysicalQuantityStringParser(dimension, self._primitive_units) 
-        self._parser = PhysicalQuantity.parsers[dimension_str]
+        if dimension_str not in PhysicalQuantity._parsers:
+            PhysicalQuantity._parsers[dimension_str] = PhysicalQuantityStringParser(dimension, PhysicalQuantity._primitive_units) 
+        self._parser = PhysicalQuantity._parsers[dimension_str]
         
         self._amount_in_basic_units = None
         if value is not None:
