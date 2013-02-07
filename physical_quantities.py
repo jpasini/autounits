@@ -36,13 +36,36 @@ def flatten_dictionary(units_dictionary):
     return new_dictionary
 
 
+from pyparsing import ParseException
+from pyparsing import Literal, replaceWith, Or, nums, Word, stringEnd
+        
+
 class PhysicalQuantityStringParser(object):
     """Object that parses a string representing an amount with units."""
+    
+    _primitive_units_dictionaries = None
+    _parsers = {}
+    _flat_unit_dictionaries = {}
+    
     def __init__(self, dimension, primitive_units_dictionaries):
         # To-do: Check if dimensionless quantities can receive a string
         
         # Create the dictionary for the dimensions given
         dimension_str = dimension.str()
+        
+        if primitive_units_dictionaries != PhysicalQuantityStringParser._primitive_units_dictionaries:
+            # we're changing unit sets, so I need to clear everything
+            PhysicalQuantityStringParser._primitive_units_dictionaries = primitive_units_dictionaries
+            PhysicalQuantityStringParser._parsers = {}
+            PhysicalQuantityStringParser._flat_unit_dictionaries = {}
+        else:
+            # check: we might have done this case already
+            if dimension_str in PhysicalQuantityStringParser._parsers:
+                self.flat_units_dictionary = PhysicalQuantityStringParser._flat_unit_dictionaries[dimension_str]
+                self._dimension = PhysicalQuantityStringParser._parsers[dimension_str]
+                return
+
+        
         pattern = dimension.str(use_braces = True)
         d = {}
         for k,v in primitive_units_dictionaries.iteritems():
@@ -65,9 +88,6 @@ class PhysicalQuantityStringParser(object):
 
         self.flat_units_dictionary = new_dictionary
         
-        from pyparsing import Literal, replaceWith, \
-            Or, nums, Word, stringEnd, ParseException
-        
         def make_literal(unit_string, val):
             return Literal(unit_string).setParseAction(replaceWith(val))
         units = Or( [ make_literal(s,v) for s,v in new_dictionary.iteritems() ] )
@@ -81,10 +101,12 @@ class PhysicalQuantityStringParser(object):
         number.setParseAction(validate_and_convert_number)
         
         self._dimension = number + units + stringEnd
+        # add to our stock
+        PhysicalQuantityStringParser._flat_unit_dictionaries[dimension_str] = self.flat_units_dictionary 
+        PhysicalQuantityStringParser._parsers[dimension_str] = self._dimension 
         
     def __call__(self, quantity_string):
         """Parse the given string."""
-        from pyparsing import ParseException
         try:
             a = self._dimension.parseString(quantity_string)
         except ParseException:
@@ -113,7 +135,7 @@ class PhysicalQuantity(object):
         # create the parser if it doesn't exist already. Index by string representation
         dimension_str = dimension.str()
         if dimension_str not in PhysicalQuantity._parsers:
-            PhysicalQuantity._parsers[dimension_str] = PhysicalQuantityStringParser(dimension, PhysicalQuantity._primitive_units) 
+            PhysicalQuantity._parsers[dimension_str] = PhysicalQuantityStringParser(dimension, PhysicalQuantity._primitive_units)
         self._parser = PhysicalQuantity._parsers[dimension_str]
         
         self._amount_in_basic_units = None
