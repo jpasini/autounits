@@ -206,17 +206,19 @@ class Distance(PhysicalQuantity):
 
 class Time(PhysicalQuantity):
     _dim = Dimension(T = 1)
+    _hr_in_secs = PhysicalQuantity(_dim, "1 hr")['s']
+    _min_in_secs = PhysicalQuantity(_dim, "1 min")['s']
+
     def __init__(self, value = None):
         PhysicalQuantity.__init__(self, Time._dim, value)
         
     @property
     def str(self):
         secs = self['s']
-        h, m = Time("1 hr"), Time("1 min")
-        hours = int(secs/h['s'])
-        secs = secs - hours*h['s']
-        mins = int(secs/m['s'])
-        secs = int(secs - mins*m['s'])
+        hours = int(secs/Time._hr_in_secs)
+        secs = secs - hours*Time._hr_in_secs
+        mins = int(secs/Time._min_in_secs)
+        secs = int(secs - mins*Time._min_in_secs)
         result = ""
         if hours > 0:
             result = result + str(hours) + ":"
