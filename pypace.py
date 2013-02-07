@@ -1,10 +1,10 @@
 from __future__ import division
 
-from physical_quantities import Distance, Speed
+from physical_quantities import Distance, Time, Speed
 
 def print_table_row(mph):
     '''Print mph and pace for 1 mile, 5k, 10k, half, and full marathon.'''
-    s = Speed("%s mph" % mph)
+    s = Speed("%s mi/hr" % mph)
     distances = ['1mi','5km','10km','0.5marathon','1marathon']
     d = [Distance(x) for x in distances]
     paces = [s.pace(x).str for x in d]
