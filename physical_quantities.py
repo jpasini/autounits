@@ -177,13 +177,15 @@ class PhysicalQuantity(object):
 
 
 class Distance(PhysicalQuantity):
+    _dim = Dimension(L = 1)
     def __init__(self, value = None):
-        PhysicalQuantity.__init__(self, Dimension(L = 1), value)
+        PhysicalQuantity.__init__(self, Distance._dim, value)
         
 
 class Time(PhysicalQuantity):
+    _dim = Dimension(T = 1)
     def __init__(self, value = None):
-        PhysicalQuantity.__init__(self, Dimension(T = 1), value)
+        PhysicalQuantity.__init__(self, Time._dim, value)
         
     @property
     def str(self):
@@ -201,10 +203,12 @@ class Time(PhysicalQuantity):
         
 
 class Speed(PhysicalQuantity):
-    def __init__(self, value = None):
-        PhysicalQuantity.__init__(self, Dimension(L = 1, T = -1), value)
+    _dim = Dimension(L = 1, T = -1)
+    def __init__(self, value = None):    
+        PhysicalQuantity.__init__(self, Speed._dim, value)
         
     def pace(self, distance):
         """Return time to cover given distance."""
+        # Cast is important to make the "str" method available.
         return Time(distance / self)
         
