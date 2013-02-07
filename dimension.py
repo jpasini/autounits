@@ -57,32 +57,15 @@ class Dimension(object):
             if v == 1:
                 numerator += "%s" % k
             elif v == -1:
-                denominator += "/%s" % k
+                denominator += "%s" % k
             elif v > 0:
                 numerator += "%s^%s" % (k, v)
             else:
-                denominator += "/%s^%s" % (k, -v)
+                denominator += "%s^%s" % (k, -v)
         if numerator == "":
             numerator = "1"
-        return numerator + denominator
-            
-    def str_for_replacement(self):
-        numerator = ""
-        denominator = ""
-        for k in self._dimensions_considered:
-            v = self.__dict__[k]
-            if v == 0:
-                continue
-            if v == 1:
-                numerator += "{%s}" % k
-            elif v == -1:
-                denominator += "/{%s}" % k
-            elif v > 0:
-                numerator += "{%s}^%s" % (k, v)
-            else:
-                denominator += "/{%s}^%s" % (k, -v)
-        if numerator == "":
-            numerator = "1"
+        if denominator != "":
+            denominator = "/" + denominator
         return numerator + denominator
             
     def __eq__(self, other):
@@ -133,3 +116,77 @@ class Dimension(object):
             Q = self.Q - other.Q,
             Theta = self.Theta - other.Theta)
 
+def get_number():
+    from pyparsing import Word, nums, ParseException
+    def validate_and_convert_number(tokens):
+        try:
+            return float(tokens[0])
+        except ValueError:
+            raise ParseException("Invalid number (%s)" % tokens[0])
+    number = Word(nums + '-' + '+' + '.').setResultsName("value") # do not allow scientific notation
+    number.setParseAction(validate_and_convert_number)
+    return number
+
+
+def get_units_literals(units_value_dictionary):
+    from pyparsing import Literal, replaceWith, Or
+    def make_literal(unit_string, val):
+        return Literal(unit_string).setParseAction(replaceWith(val))
+    units_value_dictionary["1"] = 1 # add one more term
+    return Or([make_literal(s, v) for (s, v) in units_value_dictionary.iteritems()])
+
+def get_term(units_value_dictionary):
+    from pyparsing import Optional
+    n = get_number()
+    unit = get_units_literals(units_value_dictionary)
+    #unit = Word("L" + "M" + "T" + "Q" + "Theta")
+    term = unit + Optional("^" + n)
+    def exponentiate_if_needed(tokens):
+        if len(tokens) < 2:
+            return tokens[0]
+        else:
+            return tokens[0]**tokens[2]
+    term.setParseAction(exponentiate_if_needed)
+    #term.setParseAction(lambda t: float(t[0]))
+    return term
+
+def get_numerator(units_value_dictionary):
+    from pyparsing import OneOrMore
+    term = get_term(units_value_dictionary)
+    numerator = OneOrMore(term)
+    def multiply_tokens(tokens):
+        if len(tokens) == 0:
+            return 1
+        else:
+            return reduce(lambda x, y: x*y, tokens)
+    numerator.setParseAction(multiply_tokens)
+    return numerator
+
+def get_expression(units_value_dictionary):
+    from pyparsing import Optional
+    
+    numerator = get_numerator(units_value_dictionary)
+    expression = numerator + Optional("/" + numerator)
+    def calculate_final_value(tokens):
+        l = len(tokens)
+        if l == 0:
+            return 1
+        elif l == 1:
+            return tokens[0]
+        else:
+            return tokens[0]/tokens[2]
+    expression.setParseAction(calculate_final_value)
+    return expression
+
+def parse_unit_string(unit_string, units_value_dictionary):
+    """Parse a string containing units.
+    For example:
+    
+    LT/M^3Q
+    
+    and return the corresponding value, after replacing with values
+    from units_value_dictionary, which contains, for example
+    {'L': 1, 'M': 1, 'T': 60, 'Q': 1, 'Theta': 1}
+    """
+    expression = get_expression(units_value_dictionary)
+    return expression.parseString(unit_string)[0]
