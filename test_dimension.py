@@ -1,7 +1,7 @@
 from __future__ import division
 
 import unittest
-from dimension import Dimension
+from dimension import Dimension, parse_unit_string
 from dimension import DimensionError, IncompatibleDimensionsError
 
 
@@ -46,6 +46,109 @@ class TestDimension(unittest.TestCase):
         self.assertRaises(DimensionError, Dimension, d1, L=1)
         # Keyword arguments should only be in L,M,T,Q,Theta
         self.assertRaises(DimensionError, Dimension, L=1,s=2)
+        
+    def test_for_primitive_dimension(self):
+        """Some dimensions may be 'primitive'."""
+        # Primitive dimensions
+        self.assertTrue(Dimension().is_primitive()) # convention: dimensionless is primitive
+        self.assertTrue(Dimension(M=1).is_primitive())
+        self.assertTrue(Dimension(L=1).is_primitive())
+        self.assertTrue(Dimension(T=1).is_primitive())
+        self.assertTrue(Dimension(Q=1).is_primitive())
+        self.assertTrue(Dimension(Theta=1).is_primitive())
+        # Derived dimensions
+        self.assertFalse(Dimension(M=2).is_primitive())
+        self.assertFalse(Dimension(L=1,T=1).is_primitive())
+        self.assertFalse(Dimension(L=1,T=-1).is_primitive())
+        self.assertFalse(Dimension(T=-1).is_primitive())
+        
+    def test_string_representation(self):
+        """Check that they appear in the order M L T Q Theta in either the numerator and denominator."""
+        self.assertEqual(Dimension().str(), "1")
+        self.assertEqual(Dimension(M = 1).str(), "M")
+        self.assertEqual(Dimension(L = 1).str(), "L")
+        self.assertEqual(Dimension(T = 1).str(), "T")
+        self.assertEqual(Dimension(Q = 1).str(), "Q")
+        self.assertEqual(Dimension(Theta = 1).str(), "Theta")
+        self.assertEqual(Dimension(M = 2).str(), "M^2")
+        self.assertEqual(Dimension(L = 1, T = 1).str(), "LT")
+        self.assertEqual(Dimension(L = 1, T = -1).str(), "L/T")
+        self.assertEqual(Dimension(T = -1).str(), "1/T")
+        self.assertEqual(Dimension(T = -0.5).str(), "1/T^0.5")
+        self.assertEqual(Dimension(L = 1, T = -0.5).str(), "L/T^0.5")
+        self.assertEqual(Dimension(M = 2, L = 1, T = -0.5).str(), "M^2L/T^0.5")
+        self.assertEqual(Dimension(M = -2, L = 1, T = -0.5).str(), "L/M^2T^0.5")
+        # version with braces 
+        self.assertEqual(Dimension().str(use_braces = True), "1")
+        self.assertEqual(Dimension(M = 1).str(use_braces = True), "{M}")
+        self.assertEqual(Dimension(L = 1).str(use_braces = True), "{L}")
+        self.assertEqual(Dimension(T = 1).str(use_braces = True), "{T}")
+        self.assertEqual(Dimension(Q = 1).str(use_braces = True), "{Q}")
+        self.assertEqual(Dimension(Theta = 1).str(use_braces = True), "{Theta}")
+        self.assertEqual(Dimension(M = 2).str(use_braces = True), "{M}^2")
+        self.assertEqual(Dimension(L = 1, T = 1).str(use_braces = True), "{L}{T}")
+        self.assertEqual(Dimension(L = 1, T = -1).str(use_braces = True), "{L}/{T}")
+        self.assertEqual(Dimension(T = -1).str(use_braces = True), "1/{T}")
+        self.assertEqual(Dimension(T = -0.5).str(use_braces = True), "1/{T}^0.5")
+        self.assertEqual(Dimension(L = 1, T = -0.5).str(use_braces = True), "{L}/{T}^0.5")
+        self.assertEqual(Dimension(M = 2, L = 1, T = -0.5).str(use_braces = True), "{M}^2{L}/{T}^0.5")
+        self.assertEqual(Dimension(M = -2, L = 1, T = -0.5).str(use_braces = True), "{L}/{M}^2{T}^0.5")
+    
+    def test_parsing_elements(self):
+        from dimension import get_number
+        n = get_number()
+        self.assertEqual(n.parseString("40").value, 40)
+        
+        unit_values = {'M': 2, 'L': 3, 'T': 4, 'Q': 5, 'Theta': 6}
+
+        from dimension import get_units_literals
+        u = get_units_literals(unit_values)
+        self.assertEqual(u.parseString("1")[0], 1) 
+        self.assertEqual(u.parseString("M")[0], 2) 
+        self.assertEqual(u.parseString("L")[0], 3)
+        self.assertEqual(u.parseString("T")[0], 4)
+        self.assertEqual(u.parseString("Q")[0], 5)
+        self.assertEqual(u.parseString("Theta")[0], 6)
+    
+        from dimension import get_term
+        t = get_term(unit_values)
+        self.assertEqual(t.parseString("L^2")[0], 9)
+        self.assertEqual(t.parseString("L^-2")[0], 1/9)
+        
+        from dimension import get_numerator
+        n = get_numerator(unit_values)
+        self.assertEqual(n.parseString("L^2T^3")[0], 9*64)
+        self.assertEqual(n.parseString("ThetaTTTheta")[0], 6*4*4*6)        
+
+        from dimension import get_expression
+        e = get_expression(unit_values)
+        self.assertEqual(e.parseString("L^2T^3")[0], 9*64)
+        self.assertEqual(e.parseString("ThetaTTTheta")[0], 6*4*4*6)
+        self.assertEqual(e.parseString("L/M^2T^0.5")[0], 3/(4*2))
+        # insensitive to spaces        
+        self.assertEqual(e.parseString("L / M^2T^0.5")[0], 3/(4*2))        
+        self.assertEqual(e.parseString("L/M^2 T^0.5")[0], 3/(4*2))        
+        self.assertEqual(e.parseString("L/M ^ 2 T^0.5")[0], 3/(4*2))        
+        self.assertEqual(e.parseString("1")[0], 1)
+        self.assertEqual(e.parseString("1/Q^2")[0], 1/25)
+        
+    def test_parse_string_representation(self):
+        unit_values = {'M': 2, 'L': 3, 'T': 4, 'Q': 5, 'Theta': 6}
+        self.assertEqual(parse_unit_string(Dimension().str(), unit_values), 1)
+        self.assertEqual(parse_unit_string(Dimension(M = 1).str(), unit_values), 2)
+        self.assertEqual(parse_unit_string(Dimension(L = 1).str(), unit_values), 3)
+        self.assertEqual(parse_unit_string(Dimension(T = 1).str(), unit_values), 4)
+        self.assertEqual(parse_unit_string(Dimension(Q = 1).str(), unit_values), 5)
+        self.assertEqual(parse_unit_string(Dimension(Theta = 1).str(), unit_values), 6)
+        self.assertEqual(parse_unit_string(Dimension(M = 2).str(), unit_values), 4)
+        self.assertEqual(parse_unit_string(Dimension(L = 1, T = 1).str(), unit_values), 3*4)
+        self.assertEqual(parse_unit_string(Dimension(L = 1, T = -1).str(), unit_values), 3/4)
+        self.assertEqual(parse_unit_string(Dimension(L = 1, T = -1, Theta = 2).str(), unit_values), 3/4*36)
+        self.assertEqual(parse_unit_string(Dimension(T = -1).str(), unit_values), 1/4)
+        self.assertEqual(parse_unit_string(Dimension(T = -0.5).str(), unit_values), 1/2)
+        self.assertEqual(parse_unit_string(Dimension(L = 1, T = -0.5).str(), unit_values), 3/2)
+        self.assertEqual(parse_unit_string(Dimension(M = 2, L = 1, T = -0.5).str(), unit_values), 4*3/2)
+        self.assertEqual(parse_unit_string(Dimension(M = -2, L = 1, T = -0.5).str(), unit_values), 3/4/2)
     
     def test_for_equality(self):
         """Equality is based on dimension content."""
