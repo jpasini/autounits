@@ -2,19 +2,19 @@ from __future__ import division
 
 from physical_quantities import Distance, Speed
 
-def print_table_row(s, d):
+def print_table_row(speed, distances):
     '''Print mph and pace for 1 mile, 5k, 10k, half, and full marathon.'''
-    paces = [s.pace(x).str for x in d]
-    print '{0:.1f} & {1} & {2} & {3} & {4} & {5} \\\\'.format(s['mi/hr'], *paces)
+    paces = [speed.pace(x).str for x in distances]
+    print '{0:.1f} & {1} & {2} & {3} & {4} & {5} \\\\'.format(speed['mi/hr'], *paces)
     
 def print_table():
+    distances_str = ['1 mile','5 km','10 km','0.5 marathon','1 marathon']
+    distances = [Distance(x) for x in distances_str]
+    speed = Speed()
     mph_table = [5 + i/5 for i in range(29)]
-    s = Speed()
-    distances = ['1mi','5km','10km','0.5marathon','1marathon']
-    d = [Distance(x) for x in distances]
     for mph in mph_table:
-        s['mi/hr'] = mph
-        print_table_row(s, d)
+        speed['mi/hr'] = mph
+        print_table_row(speed, distances)
     
     
 def print_latex_header():
