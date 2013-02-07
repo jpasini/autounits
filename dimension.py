@@ -47,7 +47,11 @@ class Dimension(object):
                 number_of_nonzeros_and_nonones += 1
         return number_of_nonzeros_and_nonones == 0 and number_of_ones in [0, 1]
     
-    def str(self):
+    def str(self, use_braces = False):
+        if use_braces:
+            lbrace, rbrace = "{}"
+        else:
+            lbrace = rbrace = ""
         numerator = ""
         denominator = ""
         for k in self._dimensions_considered:
@@ -55,13 +59,13 @@ class Dimension(object):
             if v == 0:
                 continue
             if v == 1:
-                numerator += "%s" % k
+                numerator += "%s%s%s" % (lbrace, k, rbrace)
             elif v == -1:
-                denominator += "%s" % k
+                denominator += "%s%s%s" % (lbrace, k, rbrace)
             elif v > 0:
-                numerator += "%s^%s" % (k, v)
+                numerator += "%s%s%s^%s" % (lbrace, k, rbrace, v)
             else:
-                denominator += "%s^%s" % (k, -v)
+                denominator += "%s%s%s^%s" % (lbrace, k, rbrace, -v)
         if numerator == "":
             numerator = "1"
         if denominator != "":

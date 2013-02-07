@@ -78,6 +78,21 @@ class TestDimension(unittest.TestCase):
         self.assertEqual(Dimension(L = 1, T = -0.5).str(), "L/T^0.5")
         self.assertEqual(Dimension(M = 2, L = 1, T = -0.5).str(), "M^2L/T^0.5")
         self.assertEqual(Dimension(M = -2, L = 1, T = -0.5).str(), "L/M^2T^0.5")
+        # version with braces 
+        self.assertEqual(Dimension().str(use_braces = True), "1")
+        self.assertEqual(Dimension(M = 1).str(use_braces = True), "{M}")
+        self.assertEqual(Dimension(L = 1).str(use_braces = True), "{L}")
+        self.assertEqual(Dimension(T = 1).str(use_braces = True), "{T}")
+        self.assertEqual(Dimension(Q = 1).str(use_braces = True), "{Q}")
+        self.assertEqual(Dimension(Theta = 1).str(use_braces = True), "{Theta}")
+        self.assertEqual(Dimension(M = 2).str(use_braces = True), "{M}^2")
+        self.assertEqual(Dimension(L = 1, T = 1).str(use_braces = True), "{L}{T}")
+        self.assertEqual(Dimension(L = 1, T = -1).str(use_braces = True), "{L}/{T}")
+        self.assertEqual(Dimension(T = -1).str(use_braces = True), "1/{T}")
+        self.assertEqual(Dimension(T = -0.5).str(use_braces = True), "1/{T}^0.5")
+        self.assertEqual(Dimension(L = 1, T = -0.5).str(use_braces = True), "{L}/{T}^0.5")
+        self.assertEqual(Dimension(M = 2, L = 1, T = -0.5).str(use_braces = True), "{M}^2{L}/{T}^0.5")
+        self.assertEqual(Dimension(M = -2, L = 1, T = -0.5).str(use_braces = True), "{L}/{M}^2{T}^0.5")
     
     def test_parsing_elements(self):
         from dimension import get_number
