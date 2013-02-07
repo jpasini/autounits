@@ -4,6 +4,7 @@ import unittest
 from physical_quantities import PhysicalQuantity, Distance, Time, Speed
 from physical_quantities import PhysicalQuantityStringParser, \
     BadInputError, BadUnitDictionaryError, IncompatibleUnitsError
+from dimension import Dimension
 
 
 class TestQuantityStringParser(unittest.TestCase):
@@ -62,38 +63,23 @@ class TestPhysicalQuantity(unittest.TestCase):
     """Test the abstract PhysicalQuantity class."""
     
     def test_create_simply_physical_quantity(self):
-        """Simple physical quantities without synonyms."""
-        meters_in = {'m' : 1, 'mm': 0.001, 'km': 1000}
-        p = PhysicalQuantity(meters_in, "2m")
-        self.assertEqual(p['m'], 2)
-        self.assertEqual(p['mm'], 2000)
-        self.assertEqual(p['km'], 0.002)
-        p['m'] = 1000
-        self.assertEqual(p['m'], 1000)
-        self.assertEqual(p['mm'], 1000000)
-        self.assertEqual(p['km'], 1)
-
-    def test_create_physical_quantity_with_synonyms(self):
-        """Test physical quantities with synonyms."""
-        meters_in = {('m', 'meters') : 1, 'mm': 0.001, ('km','kilometers'): 1000}
-        p = PhysicalQuantity(meters_in, "3m")
+        """Simple physical quantities."""
+        d = Dimension(L = 1)
+        p = PhysicalQuantity(d, "3m")
         self.assertEqual(p['m'], 3)
         self.assertEqual(p['meters'], 3)
-        self.assertEqual(p['mm'], 3000)
         self.assertEqual(p['km'], 0.003)
         self.assertEqual(p['kilometers'], 0.003)
         p['km'] = 2
         self.assertEqual(p['m'], 2000)
         self.assertEqual(p['meters'], 2000)
-        self.assertEqual(p['mm'], 2000000)
         self.assertEqual(p['km'], 2)
         self.assertEqual(p['kilometers'], 2)
         
     def test_comparisons(self):
         """All comparisons should be available between quantities of the same type."""
-        meters_in = {'m' : 1, 'mm': 0.001, 'km': 1000}
-        p1 = PhysicalQuantity(meters_in, "2m")
-        p2 = PhysicalQuantity(meters_in, "2m")
+        p1 = PhysicalQuantity(Dimension(L=1), "2m")
+        p2 = PhysicalQuantity(Dimension(L=1), "2m")
         self.assertTrue(p1 == p2)
         self.assertTrue(p1 >= p2)
         self.assertTrue(p1 <= p2)
@@ -189,24 +175,24 @@ class TestTime(unittest.TestCase):
     
 class TestSpeed(unittest.TestCase):
     """Tests for the Speed class."""
-    # speed, distance for pace, pace
-    known_values = [
-        ['1 m/s', '1 km', '1000s'],
-        ['1 mps', '1 km', '1000s'],
-        ['1 mph', '1 mi', '1 hr']
-        ]
         
     def test_simple_speeds(self):
         """Create a few speeds and check the value."""
-        s = Speed('1 mph')
-        self.assertEqual(s['mph'], 1)
-        s['mph'] = 2.5
-        self.assertEqual(s['mph'], 2.5)
-        self.assertEqual(s['mps'], 2.5*Distance('1mi')['m']/Time('1hr')['s'])
+        s = Speed('1 mi/hr')
+        self.assertEqual(s['mi/hr'], 1)
+        s['miles/hr'] = 2.5
+        self.assertEqual(s['mi/hr'], 2.5)
+        self.assertEqual(s['m/s'], 2.5*Distance('1mi')['m']/Time('1hr')['s'])
 
     def test_check_known_pace(self):
         """Check pace for some speeds."""
-        for speed, distance, pace in self.known_values:
+        # speed, distance for pace, pace
+        known_values = [
+                        ['1 m/s', '1 km', '1000s'],
+                        ['1 meters/s', '1 km', '1000s'],
+                        ['1 mi/hr', '1 mi', '1 hr']
+                        ]
+        for speed, distance, pace in known_values:
             s, d, t = Speed(speed), Distance(distance), Time(pace)
             self.assertEqual(s.pace(d)['s'], t['s']) # the seconds should be correct
 

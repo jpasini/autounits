@@ -10,7 +10,7 @@ class BadInputError(PhysicalQuantityError): pass
 class BadUnitDictionaryError(PhysicalQuantityError): pass
 class IncompatibleUnitsError(PhysicalQuantityError): pass
 
-from dimension import Dimension
+from dimension import Dimension, parse_unit_string
 
 def flatten_dictionary(units_dictionary):
     # Make sure there are no name clashes in the units
@@ -55,13 +55,13 @@ class PhysicalQuantityStringParser(object):
             return Literal(unit_string).setParseAction(replaceWith(val))
         units = Or( [ make_literal(s,v) for s,v in new_dictionary.iteritems() ] )
         
-        def validate_number(tokens):
+        def validate_and_convert_number(tokens):
             try:
-                float(tokens[0])
+                return float(tokens[0])
             except ValueError:
                 raise ParseException("Invalid number (%s)" % tokens[0])
         number = Word(nums + 'e' + '-' + '+' + '.')
-        number.setParseAction(validate_number)
+        number.setParseAction(validate_and_convert_number)
         
         self._dimension = number + units + stringEnd
         
@@ -72,31 +72,36 @@ class PhysicalQuantityStringParser(object):
             a = self._dimension.parseString(quantity_string)
         except ParseException:
             raise BadInputError
-        return float(a[0])*a[1]
-
+        return a[0]*a[1]
 
 
 
 class NewPhysicalQuantityStringParser(object):
     """Object that parses a string representing an amount with units."""
     def __init__(self, dimension, primitive_units_dictionaries):
+        # To-do: Check if dimensionless quantities can receive a string
+        
         # Create the dictionary for the dimensions given
-        pattern = dimension.str_for_replacement()
+        dimension_str = dimension.str()
+        pattern = dimension.str(use_braces = True)
         d = {}
         for k,v in primitive_units_dictionaries.iteritems():
             d[k] = flatten_dictionary(v)
         
-        from itertools import product
-        
-        new_dictionary = {}
+        # go systematically through all primitive unit-set combinations
+        from itertools import product        
         p = list(product(d['M'].keys(), d['L'].keys(), d['T'].keys(), d['Q'].keys(), d['Theta'].keys()))
+        new_dictionary = {}
         for units in p:
+            # generate the string representing the units (e.g, "m/s^2")
             units_string_dictionary = dict(zip(['M','L','T','Q','Theta'], units))
             unit_string = pattern.format(**units_string_dictionary)
+            # it could be repeated at this stage if the target quantity has only limited dimensions 
             unit_values = [d[k][units_string_dictionary[k]] for k in ['M','L','T','Q','Theta']]
             units_value_dictionary = dict(zip(['M','L','T','Q','Theta'], unit_values))
             # I need a parser to evaluate this expression
-            new_dictionary[unit_string] =float(pattern.format(**units_value_dictionary))
+            if unit_string in new_dictionary.keys(): continue
+            new_dictionary[unit_string] = parse_unit_string(dimension_str, units_value_dictionary)
 
         self.flat_units_dictionary = new_dictionary
         
@@ -107,13 +112,13 @@ class NewPhysicalQuantityStringParser(object):
             return Literal(unit_string).setParseAction(replaceWith(val))
         units = Or( [ make_literal(s,v) for s,v in new_dictionary.iteritems() ] )
         
-        def validate_number(tokens):
+        def validate_and_convert_number(tokens):
             try:
-                float(tokens[0])
+                return float(tokens[0])
             except ValueError:
                 raise ParseException("Invalid number (%s)" % tokens[0])
         number = Word(nums + 'e' + '-' + '+' + '.')
-        number.setParseAction(validate_number)
+        number.setParseAction(validate_and_convert_number)
         
         self._dimension = number + units + stringEnd
         
@@ -124,7 +129,7 @@ class NewPhysicalQuantityStringParser(object):
             a = self._dimension.parseString(quantity_string)
         except ParseException:
             raise BadInputError
-        return float(a[0])*a[1]
+        return a[0]*a[1]
         
 from functools import total_ordering
 
@@ -193,6 +198,22 @@ class PhysicalQuantity(object):
         result = PhysicalQuantity(self.dimension)
         result._amount_in_basic_units = self._amount_in_basic_units - other._amount_in_basic_units
         return result
+
+    def __mul__(self, other):
+        result = PhysicalQuantity(self.dimension*other.dimension)
+        result._amount_in_basic_units = self._amount_in_basic_units*other._amount_in_basic_units
+        return result
+        
+    def __div__(self, other):
+        result = PhysicalQuantity(self.dimension/other.dimension)
+        result._amount_in_basic_units = self._amount_in_basic_units/other._amount_in_basic_units
+        return result
+        
+    def __truediv__(self, other):
+        result = PhysicalQuantity(self.dimension/other.dimension)
+        result._amount_in_basic_units = self._amount_in_basic_units/other._amount_in_basic_units
+        return result
+        
 
 
 class Distance(PhysicalQuantity):
