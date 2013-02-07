@@ -93,8 +93,11 @@ class PhysicalQuantityStringParser(object):
         
 from functools import total_ordering
 
+parsers = {}
+
 @total_ordering
 class PhysicalQuantity(object):
+    
     def __init__(self, dimension = Dimension(), value = None):
         if type(dimension) != Dimension:
             raise PhysicalQuantityError
@@ -108,15 +111,12 @@ class PhysicalQuantity(object):
         self._primitive_units['Q'] = {'C': 1}
         self._primitive_units['Theta'] = {'K': 1}
         
-        self._parser = PhysicalQuantityStringParser(dimension, self._primitive_units)
+        dimension_str = dimension.str()
+        if dimension_str not in parsers.keys():
+            parsers[dimension_str] = PhysicalQuantityStringParser(dimension, self._primitive_units) 
+        self._parser = parsers[dimension_str]
         
-        ## Create parsers for all primitive units.
-        #self._parsers = {k: PhysicalQuantityStringParser(v) for k,v in self._primitive_units.iteritems()}
-
         self._amount_in_basic_units = None
-        
-        # Create units_dictionary for creating parser
-        #self._parser = PhysicalQuantityStringParser(units_dictionary)
         if value is not None:
             if type(value) == str:
                 self._amount_in_basic_units = self._parser(value)
