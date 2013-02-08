@@ -34,6 +34,10 @@ class Dimension(object):
                 raise DimensionError
             for k in self._dimensions_considered:
                 self.__dict__[k] = 0 if k not in kwargs else kwargs[k]
+                
+    def __repr__(self):
+        args = ", ".join(["%s = %s" % (k, repr(self.__dict__[k])) for k in self._dimensions_considered])
+        return "Dimension(%s)" % args
             
     def is_primitive(self):
         """The dimension is primitive if it's either dimensionless or only one."""

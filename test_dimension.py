@@ -25,6 +25,17 @@ class TestDimension(unittest.TestCase):
         self.assertEqual(d2.Q, 0)
         self.assertEqual(d2.Theta, 0)
         
+    def test_repr(self):
+        """Test that I can use repr() to recreate a Dimension object."""
+        d1 = Dimension()
+        d2 = eval(repr(d1))
+        self.assertEqual(d1, d2)
+        # a time with a long representation
+        d1 = Dimension(T = 1/3)
+        d2 = eval(repr(d1))
+        self.assertEqual(d1, d2)
+        
+        
     def test_create_from_other_dimension(self):
         """Create dimensions from other dimensions."""
         d1 = Dimension(L = 1, T = -1)

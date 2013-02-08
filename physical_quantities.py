@@ -160,6 +160,11 @@ class PhysicalQuantity(object):
         
     def get_available_units(self):
         return self._parser.flat_units_dictionary.keys()
+    
+    def __repr__(self):
+        unit = self.get_available_units()[0] # use the first one
+        unit_to_print = "" if unit == "1" else " %s" % unit
+        return "PhysicalQuantity(%s,'%s%s')" % (repr(self.dimension), repr(self[unit]), unit_to_print)  
                 
     def __eq__(self, other):
         """Equality is defined by the dimension and amount."""

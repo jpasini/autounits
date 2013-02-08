@@ -92,8 +92,8 @@ class TestPhysicalQuantity(unittest.TestCase):
         
     def test_comparisons(self):
         """All comparisons should be available between quantities of the same type."""
-        p1 = PhysicalQuantity(Dimension(L=1), "2m")
-        p2 = PhysicalQuantity(Dimension(L=1), "2m")
+        p1 = PhysicalQuantity(Dimension(L = 1), "2m")
+        p2 = PhysicalQuantity(Dimension(L = 1), "2m")
         self.assertTrue(p1 == p2)
         self.assertTrue(p1 >= p2)
         self.assertTrue(p1 <= p2)
@@ -107,6 +107,21 @@ class TestPhysicalQuantity(unittest.TestCase):
         self.assertTrue(p1 != p2)
         self.assertFalse(p1 > p2)
         self.assertTrue(p1 < p2)
+        
+    def test_repr(self):
+        """repr() should give something that can be used to recreate the object."""
+        p1 = PhysicalQuantity(Dimension(L = 1), "2m")
+        p2 = eval(repr(p1))
+        self.assertEqual(p1, p2)
+        # special case: dimensionless quantities
+        p1 = PhysicalQuantity(Dimension(), "2")
+        p2 = eval(repr(p1))
+        self.assertEqual(p1, p2)
+        # derived quantities should also work
+        t1 = Time("3 min")
+        t2 = eval(repr(t1))
+        self.assertEqual(t1, t2)
+
         
 # Test primitive quantities
         
