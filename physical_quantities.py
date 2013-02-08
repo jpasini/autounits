@@ -37,8 +37,7 @@ def flatten_dictionary(units_dictionary):
 
 
 from pyparsing import ParseException
-from pyparsing import Literal, replaceWith, Or, nums, Word, stringEnd
-        
+from pyparsing import Literal, replaceWith, Or, stringEnd
 
 class PhysicalQuantityStringParser(object):
     """Object that parses a string representing an amount with units."""
@@ -48,9 +47,8 @@ class PhysicalQuantityStringParser(object):
     _flat_unit_dictionaries = {}
     
     def __init__(self, dimension, primitive_units_dictionaries):
-        # To-do: Check if dimensionless quantities can receive a string
-        
         # Create the dictionary for the dimensions given
+        self._is_dimensionless = (dimension == Dimension()) # dimensionless quantities receive special treatment 
         dimension_str = dimension.str()
         
         if primitive_units_dictionaries != PhysicalQuantityStringParser._primitive_units_dictionaries:
@@ -92,15 +90,14 @@ class PhysicalQuantityStringParser(object):
             return Literal(unit_string).setParseAction(replaceWith(val))
         units = Or( [ make_literal(s,v) for s,v in new_dictionary.iteritems() ] )
         
-        def validate_and_convert_number(tokens):
-            try:
-                return float(tokens[0])
-            except ValueError:
-                raise ParseException("Invalid number (%s)" % tokens[0])
-        number = Word(nums + 'e' + '-' + '+' + '.')
-        number.setParseAction(validate_and_convert_number)
+        from pyparsing import Regex
+        number = Regex(r'\d+(\.\d*)?([eE][+-]?\d+)?')
+        number.setParseAction(lambda tokens: float(tokens[0]))
         
-        self._dimension = number + units + stringEnd
+        if self._is_dimensionless:
+            self._dimension = number + stringEnd
+        else:
+            self._dimension = number + units + stringEnd
         # add to our stock
         PhysicalQuantityStringParser._flat_unit_dictionaries[dimension_str] = self.flat_units_dictionary 
         PhysicalQuantityStringParser._parsers[dimension_str] = self._dimension 
@@ -111,13 +108,18 @@ class PhysicalQuantityStringParser(object):
             a = self._dimension.parseString(quantity_string)
         except ParseException:
             raise BadInputError
-        return a[0]*a[1]
+        if self._is_dimensionless:
+            return a[0]
+        else:
+            return a[0]*a[1]
         
 from functools import total_ordering
 
 @total_ordering
 class PhysicalQuantity(object):
+    # For caching:
     _parsers = {}
+    _default_units = {}
     # Conversion constants for primitive quantities
     _primitive_units = {}
     _primitive_units['M'] = {('kg', 'kilogram', 'kilograms'): 1, ('g', 'gr', 'gram', 'grams'): 0.001}
@@ -137,6 +139,12 @@ class PhysicalQuantity(object):
         if dimension_str not in PhysicalQuantity._parsers:
             PhysicalQuantity._parsers[dimension_str] = PhysicalQuantityStringParser(dimension, PhysicalQuantity._primitive_units)
         self._parser = PhysicalQuantity._parsers[dimension_str]
+        # choose default units for printing and store if they're not stored already 
+        if dimension_str not in PhysicalQuantity._default_units:
+            # choose basic units (something that gives a conversion of 1) and the shortest representation
+            candidates = [k for (k,v) in self._parser.flat_units_dictionary.iteritems() if v == 1]
+            PhysicalQuantity._default_units[dimension_str] = min(candidates, key=len)
+        self._default_unit_for_printing = PhysicalQuantity._default_units[dimension_str]
         
         self._amount_in_basic_units = None
         if value is not None:
@@ -152,6 +160,19 @@ class PhysicalQuantity(object):
                 
     def __setitem__(self, key, value):
         self._amount_in_basic_units = value*self._parser.flat_units_dictionary[key]
+        
+    def get_available_units(self):
+        return self._parser.flat_units_dictionary.keys()
+    
+    def __repr__(self):
+        unit = self._default_unit_for_printing
+        unit_to_print = "" if unit == "1" else " %s" % unit
+        return "PhysicalQuantity(%s,'%s%s')" % (repr(self.dimension), repr(self[unit]), unit_to_print)  
+                
+    def __str__(self):
+        unit = self._default_unit_for_printing
+        unit_to_print = "" if unit == "1" else " %s" % unit
+        return "%g%s" % (self[unit], unit_to_print)  
                 
     def __eq__(self, other):
         """Equality is defined by the dimension and amount."""

@@ -34,6 +34,13 @@ class Dimension(object):
                 raise DimensionError
             for k in self._dimensions_considered:
                 self.__dict__[k] = 0 if k not in kwargs else kwargs[k]
+                
+    def __repr__(self):
+        args = ", ".join(["%s=%s" % (k, repr(self.__dict__[k])) for k in self._dimensions_considered])
+        return "Dimension(%s)" % args
+    
+    def __str__(self):
+        return self.str(use_braces = False)
             
     def is_primitive(self):
         """The dimension is primitive if it's either dimensionless or only one."""
@@ -131,19 +138,17 @@ def get_number():
     number.setParseAction(validate_and_convert_number)
     return number
 
-
 def get_units_literals(units_value_dictionary):
     from pyparsing import Literal, replaceWith, Or
     def make_literal(unit_string, val):
         return Literal(unit_string).setParseAction(replaceWith(val))
-    units_value_dictionary["1"] = 1 # add one more term
+    units_value_dictionary["1"] = 1 # add one more term for dimensionless quantities
     return Or([make_literal(s, v) for (s, v) in units_value_dictionary.iteritems()])
 
 def get_term(units_value_dictionary):
     from pyparsing import Optional
     n = get_number()
     unit = get_units_literals(units_value_dictionary)
-    #unit = Word("L" + "M" + "T" + "Q" + "Theta")
     term = unit + Optional("^" + n)
     def exponentiate_if_needed(tokens):
         if len(tokens) < 2:
@@ -159,28 +164,25 @@ def get_numerator(units_value_dictionary):
     term = get_term(units_value_dictionary)
     numerator = OneOrMore(term)
     def multiply_tokens(tokens):
-        if len(tokens) == 0:
-            return 1
-        else:
-            return reduce(lambda x, y: x*y, tokens)
+        return reduce(lambda x, y: x*y, tokens)
     numerator.setParseAction(multiply_tokens)
     return numerator
 
 def get_expression(units_value_dictionary):
-    from pyparsing import Optional
+    from pyparsing import Optional, stringEnd
     
     numerator = get_numerator(units_value_dictionary)
-    expression = numerator + Optional("/" + numerator)
+    expression = numerator + Optional("/" + numerator) + stringEnd
     def calculate_final_value(tokens):
         l = len(tokens)
-        if l == 0:
-            return 1
-        elif l == 1:
+        if l == 1:
             return tokens[0]
         else:
             return tokens[0]/tokens[2]
     expression.setParseAction(calculate_final_value)
     return expression
+
+cached_unit_string_parsers = {}
 
 def parse_unit_string(unit_string, units_value_dictionary):
     """Parse a string containing units.
@@ -192,5 +194,7 @@ def parse_unit_string(unit_string, units_value_dictionary):
     from units_value_dictionary, which contains, for example
     {'L': 1, 'M': 1, 'T': 60, 'Q': 1, 'Theta': 1}
     """
-    expression = get_expression(units_value_dictionary)
-    return expression.parseString(unit_string)[0]
+    combo = unit_string, tuple((k, v) for k,v in units_value_dictionary.iteritems())
+    if combo not in cached_unit_string_parsers:
+        cached_unit_string_parsers[combo] = get_expression(units_value_dictionary)
+    return cached_unit_string_parsers[combo].parseString(unit_string)[0]

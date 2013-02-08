@@ -25,6 +25,33 @@ class TestDimension(unittest.TestCase):
         self.assertEqual(d2.Q, 0)
         self.assertEqual(d2.Theta, 0)
         
+    def test_repr(self):
+        """Test that I can use repr() to recreate a Dimension object."""
+        d1 = Dimension()
+        d2 = eval(repr(d1))
+        self.assertEqual(d1, d2)
+        # a time with a long representation
+        d1 = Dimension(T = 1/3)
+        d2 = eval(repr(d1))
+        self.assertEqual(d1, d2)
+        
+    def test_str(self):
+        """Test __str__()for a Dimension object."""
+        self.assertEqual(str(Dimension()), "1")
+        self.assertEqual(str(Dimension(M = 1)), "M")
+        self.assertEqual(str(Dimension(L = 1)), "L")
+        self.assertEqual(str(Dimension(T = 1)), "T")
+        self.assertEqual(str(Dimension(Q = 1)), "Q")
+        self.assertEqual(str(Dimension(Theta = 1)), "Theta")
+        self.assertEqual(str(Dimension(M = 2)), "M^2")
+        self.assertEqual(str(Dimension(L = 1, T = 1)), "LT")
+        self.assertEqual(str(Dimension(L = 1, T = -1)), "L/T")
+        self.assertEqual(str(Dimension(T = -1)), "1/T")
+        self.assertEqual(str(Dimension(T = -0.5)), "1/T^0.5")
+        self.assertEqual(str(Dimension(L = 1, T = -0.5)), "L/T^0.5")
+        self.assertEqual(str(Dimension(M = 2, L = 1, T = -0.5)), "M^2L/T^0.5")
+        self.assertEqual(str(Dimension(M = -2, L = 1, T = -0.5)), "L/M^2T^0.5")        
+        
     def test_create_from_other_dimension(self):
         """Create dimensions from other dimensions."""
         d1 = Dimension(L = 1, T = -1)
@@ -96,8 +123,15 @@ class TestDimension(unittest.TestCase):
     
     def test_parsing_elements(self):
         from dimension import get_number
+        from pyparsing import ParseException
         n = get_number()
         self.assertEqual(n.parseString("40").value, 40)
+        self.assertEqual(n.parseString("+40").value, 40)
+        self.assertEqual(n.parseString("-40").value, -40)
+        self.assertEqual(n.parseString("-40.45").value, -40.45)
+        self.assertEqual(n.parseString("-0.45").value, -0.45)
+        self.assertRaises(ParseException, n.parseString, "- 40")
+        self.assertRaises(ParseException, n.parseString, "40+")
         
         unit_values = {'M': 2, 'L': 3, 'T': 4, 'Q': 5, 'Theta': 6}
 
@@ -109,16 +143,18 @@ class TestDimension(unittest.TestCase):
         self.assertEqual(u.parseString("T")[0], 4)
         self.assertEqual(u.parseString("Q")[0], 5)
         self.assertEqual(u.parseString("Theta")[0], 6)
+        self.assertRaises(ParseException, u.parseString, "2")
     
         from dimension import get_term
         t = get_term(unit_values)
         self.assertEqual(t.parseString("L^2")[0], 9)
         self.assertEqual(t.parseString("L^-2")[0], 1/9)
+        self.assertEqual(t.parseString("T^0.5")[0], 2)
         
         from dimension import get_numerator
         n = get_numerator(unit_values)
         self.assertEqual(n.parseString("L^2T^3")[0], 9*64)
-        self.assertEqual(n.parseString("ThetaTTTheta")[0], 6*4*4*6)        
+        self.assertEqual(n.parseString("ThetaTTTheta")[0], 6*4*4*6)
 
         from dimension import get_expression
         e = get_expression(unit_values)
@@ -131,6 +167,8 @@ class TestDimension(unittest.TestCase):
         self.assertEqual(e.parseString("L/M ^ 2 T^0.5")[0], 3/(4*2))        
         self.assertEqual(e.parseString("1")[0], 1)
         self.assertEqual(e.parseString("1/Q^2")[0], 1/25)
+        # should fail if there's extra stuff
+        self.assertRaises(ParseException, e.parseString, "T^1/2") # fractions should not fail silently
         
     def test_parse_string_representation(self):
         unit_values = {'M': 2, 'L': 3, 'T': 4, 'Q': 5, 'Theta': 6}
@@ -174,7 +212,6 @@ class TestDimension(unittest.TestCase):
         d2 = Dimension(L = 1)
         self.assertRaises(IncompatibleDimensionsError, d1.__add__, d2)
         self.assertRaises(IncompatibleDimensionsError, d1.__sub__, d2)
-        
 
     def test_multiply_and_divide_dimensions(self):
         """Multiply and divide dimensions."""
