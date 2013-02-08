@@ -128,6 +128,8 @@ class TestDimension(unittest.TestCase):
         self.assertEqual(n.parseString("40").value, 40)
         self.assertEqual(n.parseString("+40").value, 40)
         self.assertEqual(n.parseString("-40").value, -40)
+        self.assertEqual(n.parseString("-40.45").value, -40.45)
+        self.assertEqual(n.parseString("-0.45").value, -0.45)
         self.assertRaises(ParseException, n.parseString, "- 40")
         self.assertRaises(ParseException, n.parseString, "40+")
         
