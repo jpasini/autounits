@@ -5,9 +5,67 @@ from physical_quantities import PhysicalQuantity, Distance, Time, Speed
 from physical_quantities import BadInputError, BadUnitDictionaryError, IncompatibleUnitsError
 from dimension import Dimension
 
+class TestAuxiliaryFunctions(unittest.TestCase):
+    
+    def test_flatten_good_dictionary(self):
+        """Test flattening a units dictionary."""
+        from physical_quantities import flatten_dictionary
+        units_dictionary = {('kg', 'kilogram'): 1, ('g', 'gr', 'gram'): 0.001}
+        flat_dictionary = flatten_dictionary(units_dictionary)
+        self.assertEqual(flat_dictionary, {'kg': 1, 'kilogram': 1, 'g': 0.001, 'gr': 0.001, 'gram': 0.001})
+
+    def test_flatten_bad_dictionary(self):
+        """Flattening a units dictionary with repeats should fail."""
+        from physical_quantities import flatten_dictionary
+        units_dictionary = {('kg', 'kilogram'): 1, ('g', 'gr', 'kg'): 0.001}
+        self.assertRaises(BadUnitDictionaryError, flatten_dictionary, units_dictionary)
+        
+    def test_parser(self):
+        from physical_quantities import PhysicalQuantityStringParser
+        primitive_units_dictionaries = {
+            'M': {('kg', 'kilogram'): 1, ('g', 'gr', 'gram'): 0.001},
+            'L': {('m', 'meter'): 1, 'km': 1000},
+            'T': {'s': 1, ('min', 'minute'): 60},
+            'Q': {'C': 1 },
+            'Theta': {'K': 1} }
+        d1 = Dimension(M = 1, L = -2, T = 4, Theta = -1)
+        p1 = PhysicalQuantityStringParser(d1, primitive_units_dictionaries)
+        self.assertEqual(len(p1.flat_units_dictionary), 5*3*3*1)
+        # repeat the same case (should use caching)
+        p2 = PhysicalQuantityStringParser(d1, primitive_units_dictionaries)
+        self.assertEqual(p1.flat_units_dictionary, p2.flat_units_dictionary)
+        d2 = Dimension(T = -1, Q = 1, Theta = -2)
+        p3 = PhysicalQuantityStringParser(d2, primitive_units_dictionaries)
+        self.assertEqual(p3.flat_units_dictionary, {"C/sK^2": 1, "C/minK^2": 1/60, "C/minuteK^2": 1/60})
+        # Check a simple case
+        self.assertEqual(p3("60 C/minK^2"), 1)
+        # Bad input should raise an exception 
+        self.assertRaises(BadInputError, p3, "60 C/min K^2") # spaces in units
+        self.assertRaises(BadInputError, p3, "60.3.2 C/minK^2") # bad number
+        
+
 
 class TestPhysicalQuantity(unittest.TestCase):
-    """Test the abstract PhysicalQuantity class."""
+    """Test the PhysicalQuantity class."""
+
+    def test_dimensionless_quantity(self):
+        """Test dimensionless quantities."""
+        d = Dimension()
+        # creating
+        p = PhysicalQuantity(d)
+        # assigning the value. The "unit" is "1"
+        p["1"] = 4 
+        # getting the value
+        self.assertEqual(p["1"], 4)
+        # creating from a string
+        p = PhysicalQuantity(d, "7 1") # this works, but it's just silly
+        self.assertEqual(p["1"], 7)
+        
+    def test_bad_creation(self):
+        """Creation with bad inputs should raise exceptions."""
+        from physical_quantities import PhysicalQuantityError
+        d = 3
+        self.assertRaises(PhysicalQuantityError, PhysicalQuantity, d, "3m") # not a dimension
     
     def test_create_simply_physical_quantity(self):
         """Simple physical quantities."""
@@ -61,6 +119,9 @@ class TestDistance(unittest.TestCase):
         d1 = PhysicalQuantity(Dimension(L = 1), "1 m")
         d2 = Distance(d1)
         self.assertEqual(d1['m'], d2['m'])
+        # Check creating from another quantity with different dimensions
+        d1 = PhysicalQuantity(Dimension(T = 1), "1 s")
+        self.assertRaises(IncompatibleUnitsError, Distance, d1)        
         
             
     def test_consistency(self):
@@ -175,10 +236,12 @@ class TestCombinedDimensions(unittest.TestCase):
     def test_multiplication_and_division_of_combined_units(self):
         d = Distance("10m")
         t = Time("5s")
-        s1 = d/t
+        s1 = d/t # division
         s2 = Speed("2m/s")
         self.assertEqual(s1.dimension, s2.dimension)
         self.assertEqual(s1, s2)
+        d2 = s2*t # multiplication
+        self.assertEqual(d2, d)
         
         
 if __name__ == '__main__':
