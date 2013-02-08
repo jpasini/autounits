@@ -38,6 +38,9 @@ class Dimension(object):
     def __repr__(self):
         args = ", ".join(["%s=%s" % (k, repr(self.__dict__[k])) for k in self._dimensions_considered])
         return "Dimension(%s)" % args
+    
+    def __str__(self):
+        return self.str(use_braces = False)
             
     def is_primitive(self):
         """The dimension is primitive if it's either dimensionless or only one."""
@@ -134,7 +137,6 @@ def get_number():
     number = Word(nums + '-' + '+' + '.').setResultsName("value") # do not allow scientific notation
     number.setParseAction(validate_and_convert_number)
     return number
-
 
 def get_units_literals(units_value_dictionary):
     from pyparsing import Literal, replaceWith, Or

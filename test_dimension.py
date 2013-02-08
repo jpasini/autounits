@@ -35,6 +35,22 @@ class TestDimension(unittest.TestCase):
         d2 = eval(repr(d1))
         self.assertEqual(d1, d2)
         
+    def test_str(self):
+        """Test __str__()for a Dimension object."""
+        self.assertEqual(str(Dimension()), "1")
+        self.assertEqual(str(Dimension(M = 1)), "M")
+        self.assertEqual(str(Dimension(L = 1)), "L")
+        self.assertEqual(str(Dimension(T = 1)), "T")
+        self.assertEqual(str(Dimension(Q = 1)), "Q")
+        self.assertEqual(str(Dimension(Theta = 1)), "Theta")
+        self.assertEqual(str(Dimension(M = 2)), "M^2")
+        self.assertEqual(str(Dimension(L = 1, T = 1)), "LT")
+        self.assertEqual(str(Dimension(L = 1, T = -1)), "L/T")
+        self.assertEqual(str(Dimension(T = -1)), "1/T")
+        self.assertEqual(str(Dimension(T = -0.5)), "1/T^0.5")
+        self.assertEqual(str(Dimension(L = 1, T = -0.5)), "L/T^0.5")
+        self.assertEqual(str(Dimension(M = 2, L = 1, T = -0.5)), "M^2L/T^0.5")
+        self.assertEqual(str(Dimension(M = -2, L = 1, T = -0.5)), "L/M^2T^0.5")        
         
     def test_create_from_other_dimension(self):
         """Create dimensions from other dimensions."""
@@ -194,7 +210,6 @@ class TestDimension(unittest.TestCase):
         d2 = Dimension(L = 1)
         self.assertRaises(IncompatibleDimensionsError, d1.__add__, d2)
         self.assertRaises(IncompatibleDimensionsError, d1.__sub__, d2)
-        
 
     def test_multiply_and_divide_dimensions(self):
         """Multiply and divide dimensions."""
