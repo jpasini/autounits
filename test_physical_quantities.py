@@ -39,6 +39,7 @@ class TestAuxiliaryFunctions(unittest.TestCase):
         self.assertEqual(p3.flat_units_dictionary, {"C/sK^2": 1, "C/minK^2": 1/60, "C/minuteK^2": 1/60})
         # Check a simple case
         self.assertEqual(p3("60 C/minK^2"), 1)
+        self.assertEqual(p3("2.4e-2 C/minK^2"), 4e-4)
         # Bad input should raise an exception 
         self.assertRaises(BadInputError, p3, "60 C/min K^2") # spaces in units
         self.assertRaises(BadInputError, p3, "60.3.2 C/minK^2") # bad number

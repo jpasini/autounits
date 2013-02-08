@@ -37,8 +37,7 @@ def flatten_dictionary(units_dictionary):
 
 
 from pyparsing import ParseException
-from pyparsing import Literal, replaceWith, Or, nums, Word, stringEnd
-        
+from pyparsing import Literal, replaceWith, Or, stringEnd
 
 class PhysicalQuantityStringParser(object):
     """Object that parses a string representing an amount with units."""
@@ -91,13 +90,9 @@ class PhysicalQuantityStringParser(object):
             return Literal(unit_string).setParseAction(replaceWith(val))
         units = Or( [ make_literal(s,v) for s,v in new_dictionary.iteritems() ] )
         
-        def validate_and_convert_number(tokens):
-            try:
-                return float(tokens[0])
-            except ValueError:
-                raise ParseException("Invalid number (%s)" % tokens[0])
-        number = Word(nums + 'e' + '-' + '+' + '.')
-        number.setParseAction(validate_and_convert_number)
+        from pyparsing import Regex
+        number = Regex(r'\d+(\.\d*)?([eE][+-]?\d+)?')
+        number.setParseAction(lambda tokens: float(tokens[0]))
         
         if self._is_dimensionless:
             self._dimension = number + stringEnd
