@@ -48,9 +48,8 @@ class PhysicalQuantityStringParser(object):
     _flat_unit_dictionaries = {}
     
     def __init__(self, dimension, primitive_units_dictionaries):
-        # To-do: Check if dimensionless quantities can receive a string
-        
         # Create the dictionary for the dimensions given
+        self._is_dimensionless = (dimension == Dimension()) # dimensionless quantities receive special treatment 
         dimension_str = dimension.str()
         
         if primitive_units_dictionaries != PhysicalQuantityStringParser._primitive_units_dictionaries:
@@ -100,7 +99,10 @@ class PhysicalQuantityStringParser(object):
         number = Word(nums + 'e' + '-' + '+' + '.')
         number.setParseAction(validate_and_convert_number)
         
-        self._dimension = number + units + stringEnd
+        if self._is_dimensionless:
+            self._dimension = number + stringEnd
+        else:
+            self._dimension = number + units + stringEnd
         # add to our stock
         PhysicalQuantityStringParser._flat_unit_dictionaries[dimension_str] = self.flat_units_dictionary 
         PhysicalQuantityStringParser._parsers[dimension_str] = self._dimension 
@@ -111,7 +113,10 @@ class PhysicalQuantityStringParser(object):
             a = self._dimension.parseString(quantity_string)
         except ParseException:
             raise BadInputError
-        return a[0]*a[1]
+        if self._is_dimensionless:
+            return a[0]
+        else:
+            return a[0]*a[1]
         
 from functools import total_ordering
 
@@ -152,6 +157,9 @@ class PhysicalQuantity(object):
                 
     def __setitem__(self, key, value):
         self._amount_in_basic_units = value*self._parser.flat_units_dictionary[key]
+        
+    def get_available_units(self):
+        return self._parser.flat_units_dictionary.keys()
                 
     def __eq__(self, other):
         """Equality is defined by the dimension and amount."""

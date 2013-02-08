@@ -44,7 +44,6 @@ class TestAuxiliaryFunctions(unittest.TestCase):
         self.assertRaises(BadInputError, p3, "60.3.2 C/minK^2") # bad number
         
 
-
 class TestPhysicalQuantity(unittest.TestCase):
     """Test the PhysicalQuantity class."""
 
@@ -53,13 +52,14 @@ class TestPhysicalQuantity(unittest.TestCase):
         d = Dimension()
         # creating
         p = PhysicalQuantity(d)
-        # assigning the value. The "unit" is "1"
+        # assigning & getting the value. The "unit" is "1": need a better interface.
         p["1"] = 4 
-        # getting the value
         self.assertEqual(p["1"], 4)
         # creating from a string
-        p = PhysicalQuantity(d, "7 1") # this works, but it's just silly
+        p = PhysicalQuantity(d, "7")
         self.assertEqual(p["1"], 7)
+        # creating from a string: trying to use "1" as unit in the string fails
+        self.assertRaises(BadInputError, PhysicalQuantity, d, "7 1")
         
     def test_bad_creation(self):
         """Creation with bad inputs should raise exceptions."""
@@ -80,6 +80,15 @@ class TestPhysicalQuantity(unittest.TestCase):
         self.assertEqual(p['meters'], 2000)
         self.assertEqual(p['km'], 2)
         self.assertEqual(p['kilometers'], 2)
+        
+    def test_get_available_units(self):
+        """Test that I can get the available units."""
+        self.assertEqual(set(PhysicalQuantity(Dimension()).get_available_units()), set(["1"]))
+        # test only whether it's a subset, so it doesn't fail as I add more units 
+        self.assertTrue(set(["kg", "kilogram", "g", "gram"])
+                        <= set(PhysicalQuantity(Dimension(M = 1)).get_available_units()))
+        self.assertTrue(set(["m/s", "meters/second", "miles/hour", "mi/hr"])
+                        <= set(Speed().get_available_units()))
         
     def test_comparisons(self):
         """All comparisons should be available between quantities of the same type."""
