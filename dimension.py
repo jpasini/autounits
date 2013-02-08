@@ -159,23 +159,18 @@ def get_numerator(units_value_dictionary):
     term = get_term(units_value_dictionary)
     numerator = OneOrMore(term)
     def multiply_tokens(tokens):
-        if len(tokens) == 0:
-            return 1
-        else:
-            return reduce(lambda x, y: x*y, tokens)
+        return reduce(lambda x, y: x*y, tokens)
     numerator.setParseAction(multiply_tokens)
     return numerator
 
 def get_expression(units_value_dictionary):
-    from pyparsing import Optional
+    from pyparsing import Optional, stringEnd
     
     numerator = get_numerator(units_value_dictionary)
-    expression = numerator + Optional("/" + numerator)
+    expression = numerator + Optional("/" + numerator) + stringEnd
     def calculate_final_value(tokens):
         l = len(tokens)
-        if l == 0:
-            return 1
-        elif l == 1:
+        if l == 1:
             return tokens[0]
         else:
             return tokens[0]/tokens[2]

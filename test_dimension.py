@@ -96,8 +96,13 @@ class TestDimension(unittest.TestCase):
     
     def test_parsing_elements(self):
         from dimension import get_number
+        from pyparsing import ParseException
         n = get_number()
         self.assertEqual(n.parseString("40").value, 40)
+        self.assertEqual(n.parseString("+40").value, 40)
+        self.assertEqual(n.parseString("-40").value, -40)
+        self.assertRaises(ParseException, n.parseString, "- 40")
+        self.assertRaises(ParseException, n.parseString, "40+")
         
         unit_values = {'M': 2, 'L': 3, 'T': 4, 'Q': 5, 'Theta': 6}
 
@@ -109,16 +114,18 @@ class TestDimension(unittest.TestCase):
         self.assertEqual(u.parseString("T")[0], 4)
         self.assertEqual(u.parseString("Q")[0], 5)
         self.assertEqual(u.parseString("Theta")[0], 6)
+        self.assertRaises(ParseException, u.parseString, "2")
     
         from dimension import get_term
         t = get_term(unit_values)
         self.assertEqual(t.parseString("L^2")[0], 9)
         self.assertEqual(t.parseString("L^-2")[0], 1/9)
+        self.assertEqual(t.parseString("T^0.5")[0], 2)
         
         from dimension import get_numerator
         n = get_numerator(unit_values)
         self.assertEqual(n.parseString("L^2T^3")[0], 9*64)
-        self.assertEqual(n.parseString("ThetaTTTheta")[0], 6*4*4*6)        
+        self.assertEqual(n.parseString("ThetaTTTheta")[0], 6*4*4*6)
 
         from dimension import get_expression
         e = get_expression(unit_values)
@@ -131,6 +138,8 @@ class TestDimension(unittest.TestCase):
         self.assertEqual(e.parseString("L/M ^ 2 T^0.5")[0], 3/(4*2))        
         self.assertEqual(e.parseString("1")[0], 1)
         self.assertEqual(e.parseString("1/Q^2")[0], 1/25)
+        # should fail if there's extra stuff
+        self.assertRaises(ParseException, e.parseString, "T^1/2") # fractions should not fail silently
         
     def test_parse_string_representation(self):
         unit_values = {'M': 2, 'L': 3, 'T': 4, 'Q': 5, 'Theta': 6}
