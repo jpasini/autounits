@@ -36,7 +36,7 @@ class Dimension(object):
                 self.__dict__[k] = 0 if k not in kwargs else kwargs[k]
                 
     def __repr__(self):
-        args = ", ".join(["%s = %s" % (k, repr(self.__dict__[k])) for k in self._dimensions_considered])
+        args = ", ".join(["%s=%s" % (k, repr(self.__dict__[k])) for k in self._dimensions_considered])
         return "Dimension(%s)" % args
             
     def is_primitive(self):
