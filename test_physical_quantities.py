@@ -121,7 +121,26 @@ class TestPhysicalQuantity(unittest.TestCase):
         t1 = Time("3 min")
         t2 = eval(repr(t1))
         self.assertEqual(t1, t2)
+        # a more complicated case
+        p1 = Speed("30m/s")/Time("2s")/PhysicalQuantity(Dimension(M = 1), "3kg")
+        p2 = eval(repr(p1))
+        self.assertEqual(p1, p2)
 
+    def test_str(self):
+        """str() prints a reasonable form for the quantity."""
+        # dimensionless case
+        p = PhysicalQuantity(Dimension(), "2.1e2")
+        self.assertEqual(str(p), "210")
+        # For quantities that are NOT dimensionless we use the "basic unit" (whatever has a unit conversion
+        # factor, so it's SI in our case) with the shortest string representation.
+        # Also, in both the numerator and denominator the order followed is M L T Q Theta 
+        p = Speed("60 km/min")
+        self.assertEqual(str(p), "1000 m/s")
+        p = PhysicalQuantity(Dimension(Q = 1), "4 coulomb")
+        self.assertEqual(str(p), "4 C")
+        p = Speed("30m/s")/Time("2s")/PhysicalQuantity(Dimension(M = 1), "3kg")
+        self.assertEqual(str(p), "5 m/kgs^2")
+                
         
 # Test primitive quantities
         

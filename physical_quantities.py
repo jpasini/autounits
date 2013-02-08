@@ -122,7 +122,9 @@ from functools import total_ordering
 
 @total_ordering
 class PhysicalQuantity(object):
+    # For caching:
     _parsers = {}
+    _default_units = {}
     # Conversion constants for primitive quantities
     _primitive_units = {}
     _primitive_units['M'] = {('kg', 'kilogram', 'kilograms'): 1, ('g', 'gr', 'gram', 'grams'): 0.001}
@@ -142,6 +144,12 @@ class PhysicalQuantity(object):
         if dimension_str not in PhysicalQuantity._parsers:
             PhysicalQuantity._parsers[dimension_str] = PhysicalQuantityStringParser(dimension, PhysicalQuantity._primitive_units)
         self._parser = PhysicalQuantity._parsers[dimension_str]
+        # choose default units for printing and store if they're not stored already 
+        if dimension_str not in PhysicalQuantity._default_units:
+            # choose basic units (something that gives a conversion of 1) and the shortest representation
+            candidates = [k for (k,v) in self._parser.flat_units_dictionary.iteritems() if v == 1]
+            PhysicalQuantity._default_units[dimension_str] = min(candidates, key=len)
+        self._default_unit_for_printing = PhysicalQuantity._default_units[dimension_str]
         
         self._amount_in_basic_units = None
         if value is not None:
@@ -162,9 +170,14 @@ class PhysicalQuantity(object):
         return self._parser.flat_units_dictionary.keys()
     
     def __repr__(self):
-        unit = self.get_available_units()[0] # use the first one
+        unit = self._default_unit_for_printing
         unit_to_print = "" if unit == "1" else " %s" % unit
         return "PhysicalQuantity(%s,'%s%s')" % (repr(self.dimension), repr(self[unit]), unit_to_print)  
+                
+    def __str__(self):
+        unit = self._default_unit_for_printing
+        unit_to_print = "" if unit == "1" else " %s" % unit
+        return "%g%s" % (self[unit], unit_to_print)  
                 
     def __eq__(self, other):
         """Equality is defined by the dimension and amount."""
