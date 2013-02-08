@@ -140,14 +140,13 @@ def get_units_literals(units_value_dictionary):
     from pyparsing import Literal, replaceWith, Or
     def make_literal(unit_string, val):
         return Literal(unit_string).setParseAction(replaceWith(val))
-    units_value_dictionary["1"] = 1 # add one more term
+    units_value_dictionary["1"] = 1 # add one more term for dimensionless quantities
     return Or([make_literal(s, v) for (s, v) in units_value_dictionary.iteritems()])
 
 def get_term(units_value_dictionary):
     from pyparsing import Optional
     n = get_number()
     unit = get_units_literals(units_value_dictionary)
-    #unit = Word("L" + "M" + "T" + "Q" + "Theta")
     term = unit + Optional("^" + n)
     def exponentiate_if_needed(tokens):
         if len(tokens) < 2:
@@ -181,6 +180,8 @@ def get_expression(units_value_dictionary):
     expression.setParseAction(calculate_final_value)
     return expression
 
+cached_unit_string_parsers = {}
+
 def parse_unit_string(unit_string, units_value_dictionary):
     """Parse a string containing units.
     For example:
@@ -191,5 +192,7 @@ def parse_unit_string(unit_string, units_value_dictionary):
     from units_value_dictionary, which contains, for example
     {'L': 1, 'M': 1, 'T': 60, 'Q': 1, 'Theta': 1}
     """
-    expression = get_expression(units_value_dictionary)
-    return expression.parseString(unit_string)[0]
+    combo = unit_string, tuple((k, v) for k,v in units_value_dictionary.iteritems())
+    if combo not in cached_unit_string_parsers:
+        cached_unit_string_parsers[combo] = get_expression(units_value_dictionary)
+    return cached_unit_string_parsers[combo].parseString(unit_string)[0]
