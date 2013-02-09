@@ -139,6 +139,8 @@ class TestPhysicalQuantity(unittest.TestCase):
         self.assertEqual(str(p), "1000 m/s")
         p = PhysicalQuantity(Dimension(Q = 1), "4 coulomb")
         self.assertEqual(str(p), "4 C")
+        p = Temperature("4 kelvin")
+        self.assertEqual(str(p), "4 K")
         p = Speed("30m/s")/Time("2s")/PhysicalQuantity(Dimension(M = 1), "3kg")
         self.assertEqual(str(p), "5 m/kgs^2")
                 
