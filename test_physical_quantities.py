@@ -317,6 +317,15 @@ class TestTemperature(unittest.TestCase):
             t = Temperature('1' + unit) # create "1x" where x is the unit
             self.assertEqual(t[unit], 1)
             
+    def test_known_values(self):
+        t = Temperature()
+        for K, R, C, F in self.known_values:
+            t['K'] = K
+            self.assertAlmostEqual(t['K'], K)
+            self.assertAlmostEqual(t['R'], R)
+            self.assertAlmostEqual(t['C'], C)
+            self.assertAlmostEqual(t['F'], F)
+            
 # Test derived quantities
     
 class TestSpeed(unittest.TestCase):
