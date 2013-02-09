@@ -221,13 +221,13 @@ class PhysicalQuantity(object):
 class Mass(PhysicalQuantity):
     _dim = Dimension(M = 1)
     def __init__(self, value = None):
-        PhysicalQuantity.__init__(self, Mass._dim, value)
+        super(Mass, self).__init__(Mass._dim, value)
 
 
 class Distance(PhysicalQuantity):
     _dim = Dimension(L = 1)
     def __init__(self, value = None):
-        PhysicalQuantity.__init__(self, Distance._dim, value)
+        super(Distance, self).__init__(Distance._dim, value)
         
 
 class Time(PhysicalQuantity):
@@ -236,7 +236,7 @@ class Time(PhysicalQuantity):
     _min_in_secs = PhysicalQuantity(_dim, "1 min")['s']
 
     def __init__(self, value = None):
-        PhysicalQuantity.__init__(self, Time._dim, value)
+        super(Time, self).__init__(Time._dim, value)
         
     @property
     def str(self):
@@ -255,7 +255,7 @@ class Time(PhysicalQuantity):
 class Temperature(PhysicalQuantity):
     _dim = Dimension(Theta = 1)
     def __init__(self, value = None):    
-        PhysicalQuantity.__init__(self, Temperature._dim, value)        
+        super(Temperature, self).__init__(Temperature._dim, value)        
 
     def __getitem__(self, key):
         if key == 'C':
@@ -265,7 +265,7 @@ class Temperature(PhysicalQuantity):
             C = self._amount_in_basic_units/self._parser.flat_units_dictionary['K'] - 273.15
             return C*9/5 + 32
         else:
-            return PhysicalQuantity.__getitem__(self, key)
+            return super(Temperature, self).__getitem__(key)
             
     def __setitem__(self, key, value):
         if key == 'C':
@@ -273,9 +273,8 @@ class Temperature(PhysicalQuantity):
         elif key == 'F':
             self._amount_in_basic_units = ((value - 32)*5/9 + 273.15)/self._parser.flat_units_dictionary['K']
         else:
-            return PhysicalQuantity.__setitem__(self, key, value)
-            
-        
+            super(Temperature, self).__setitem__(key, value)
+
 
 # Some important derived quantities        
 
@@ -283,7 +282,7 @@ class Temperature(PhysicalQuantity):
 class Speed(PhysicalQuantity):
     _dim = Dimension(L = 1, T = -1)
     def __init__(self, value = None):    
-        PhysicalQuantity.__init__(self, Speed._dim, value)
+        super(Speed, self).__init__(Speed._dim, value)
         
     def pace(self, distance):
         """Return time to cover given distance."""
