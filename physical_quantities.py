@@ -218,6 +218,11 @@ class PhysicalQuantity(object):
         return result
         
 
+class Mass(PhysicalQuantity):
+    _dim = Dimension(M = 1)
+    def __init__(self, value = None):
+        PhysicalQuantity.__init__(self, Mass._dim, value)
+
 
 class Distance(PhysicalQuantity):
     _dim = Dimension(L = 1)

@@ -1,7 +1,7 @@
 from __future__ import division
 
 import unittest
-from physical_quantities import PhysicalQuantity, Distance, Time, Speed
+from physical_quantities import PhysicalQuantity, Mass, Distance, Time, Speed
 from physical_quantities import BadInputError, BadUnitDictionaryError, IncompatibleUnitsError
 from dimension import Dimension
 
@@ -145,6 +145,68 @@ class TestPhysicalQuantity(unittest.TestCase):
         
 # Test primitive quantities
         
+class TestMass(unittest.TestCase):
+    """Tests for the Mass class."""
+    kilograms_in = {'kg' : 1, 'kilograms': 1, 'g': 0.001, 'grams': 0.001 }
+        
+    def test_create_simple_masses(self):
+        """Simple masses."""
+        # Check consistency
+        for unit,kilograms in self.kilograms_in.iteritems():
+            m = Mass('1' + unit) # create "1x" where x is the unit
+            self.assertEqual(m['kg'], kilograms) # the kilograms should be correct
+        # Check creating from other distances
+        m1 = Mass("1 kg")
+        m2 = Mass(m1)
+        self.assertEqual(m1['kg'], m2['kg'])
+        # Check creating from another quantity with same dimensions
+        m1 = PhysicalQuantity(Dimension(M = 1), "1 kg")
+        m2 = Mass(m1)
+        self.assertEqual(m1['kg'], m2['kg'])
+        # Check creating from another quantity with different dimensions
+        t = PhysicalQuantity(Dimension(T = 1), "1 s")
+        self.assertRaises(IncompatibleUnitsError, Mass, t)       
+        
+            
+    def test_consistency(self):
+        """In its own units, the value should be 1."""
+        for unit in self.kilograms_in.keys():
+            m = Mass('1' + unit) # create "1x" where x is the unit
+            self.assertEqual(m[unit], 1)
+            
+    def test_mass_adding(self):
+        """Test adding masses."""
+        m1 = Mass("10 kg")
+        m2 = Mass("300 g")
+        m3 = m1 + m2
+        self.assertEqual(m1.dimension, m3.dimension) # type is the same
+        self.assertEqual(m3['kg'], 10.3)
+        
+    def test_mass_subtracting(self):
+        """Test subtracting masses."""
+        m1 = Mass("10 kg")
+        m2 = Mass("300 g")
+        m3 = m1 - m2
+        self.assertEqual(m1.dimension, m3.dimension) # type is the same
+        self.assertAlmostEqual(m3['g'], 9700)
+        
+    def test_for_mass_equality(self):
+        """Test that masses are only compared by length."""
+        m1 = Mass("1g")
+        m2 = Mass("0.001kg")
+        self.assertEqual(m1['kg'], m2['kg']) # sanity check before the real test
+        self.assertEqual(m1, m2)
+        
+    def test_creating_from_other_mass(self):
+        """I can create a mass from another."""
+        m1 = Mass("10 kg")
+        m2 = Mass(m1)
+        self.assertEqual(m1, m2)
+        m2['kg'] = 2
+        self.assertEqual(m2['kg'], 2)
+        self.assertEqual(m1['kg'], 10) # check that we didn't modify the original one
+        
+
 class TestDistance(unittest.TestCase):
     """Tests for the Distance class."""
     meters_in = {'m' : 1, 'meters': 1, 'mi': 1609.344, 'miles': 1609.344, 'km': 1000, 'kilometers': 1000, 'marathon': 42194.988 }
