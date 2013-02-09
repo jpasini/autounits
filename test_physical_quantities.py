@@ -318,13 +318,31 @@ class TestTemperature(unittest.TestCase):
             self.assertEqual(t[unit], 1)
             
     def test_known_values(self):
-        t = Temperature()
+        t1 = Temperature()
+        t2 = Temperature()
+        t3 = Temperature()
+        t4 = Temperature()
         for K, R, C, F in self.known_values:
-            t['K'] = K
-            self.assertAlmostEqual(t['K'], K)
-            self.assertAlmostEqual(t['R'], R)
-            self.assertAlmostEqual(t['C'], C)
-            self.assertAlmostEqual(t['F'], F)
+            t1['K'] = K
+            self.assertAlmostEqual(t1['K'], K)
+            self.assertAlmostEqual(t1['R'], R)
+            self.assertAlmostEqual(t1['C'], C)
+            self.assertAlmostEqual(t1['F'], F)
+            t2['R'] = R
+            self.assertAlmostEqual(t2['K'], K)
+            self.assertAlmostEqual(t2['R'], R)
+            self.assertAlmostEqual(t2['C'], C)
+            self.assertAlmostEqual(t2['F'], F)
+            t3['C'] = C
+            self.assertAlmostEqual(t3['K'], K)
+            self.assertAlmostEqual(t3['R'], R)
+            self.assertAlmostEqual(t3['C'], C)
+            self.assertAlmostEqual(t3['F'], F)
+            t4['F'] = F
+            self.assertAlmostEqual(t4['K'], K)
+            self.assertAlmostEqual(t4['R'], R)
+            self.assertAlmostEqual(t4['C'], C)
+            self.assertAlmostEqual(t4['F'], F)
             
 # Test derived quantities
     

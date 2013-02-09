@@ -258,7 +258,6 @@ class Temperature(PhysicalQuantity):
         PhysicalQuantity.__init__(self, Temperature._dim, value)        
 
     def __getitem__(self, key):
-        print "key = %s" % key
         if key == 'C':
             K = self._amount_in_basic_units/self._parser.flat_units_dictionary['K']
             return K - 273.15
@@ -267,6 +266,14 @@ class Temperature(PhysicalQuantity):
             return C*9/5 + 32
         else:
             return PhysicalQuantity.__getitem__(self, key)
+            
+    def __setitem__(self, key, value):
+        if key == 'C':
+            self._amount_in_basic_units = (value + 273.15)*self._parser.flat_units_dictionary['K'] 
+        elif key == 'F':
+            self._amount_in_basic_units = ((value - 32)*5/9 + 273.15)/self._parser.flat_units_dictionary['K']
+        else:
+            return PhysicalQuantity.__setitem__(self, key, value)
             
         
 
