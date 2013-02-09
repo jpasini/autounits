@@ -346,7 +346,9 @@ class TestTemperature(unittest.TestCase):
             self.assertAlmostEqual(t4['C'], C)
             self.assertAlmostEqual(t4['F'], F)
             
+
 # Test derived quantities
+
     
 class TestSpeed(unittest.TestCase):
     """Tests for the Speed class."""
@@ -399,6 +401,24 @@ class TestCombinedDimensions(unittest.TestCase):
         self.assertEqual(s1, s2)
         d2 = s2*t # multiplication
         self.assertEqual(d2, d)
+        
+    def test_type_coercion_on_addition_and_subtraction(self):
+        """A PhysicalQuantity, when added/subtracted to/from a Time becomes a Time."""
+        t1 = Time("5s")
+        t2 = PhysicalQuantity(Dimension(T = 1), "1 min")
+        self.assertTrue(type(t1) != type(t2)) # sanity check before the real check
+        # coercion on the left & right
+        self.assertEqual(type(t1 + t2), type(t1))
+        self.assertEqual(type(t2 + t1), type(t1))
+        self.assertEqual(type(t1 - t2), type(t1))
+        self.assertEqual(type(t2 - t1), type(t1))
+        # A more complex example
+        s = Speed("3 m/s")
+        d = Distance("4 m")
+        t = Time("4 s")
+        self.assertEqual(type(s + d/t), Speed)
+        self.assertEqual(type(d/t + s), Speed)
+        
         
         
 if __name__ == '__main__':

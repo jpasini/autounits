@@ -188,17 +188,27 @@ class PhysicalQuantity(object):
             raise IncompatibleUnitsError
         return self._amount_in_basic_units < other._amount_in_basic_units
     
-    def __add__(self, other):
+    def create_coerced_type(self, other):
+        """For some binary operations: the result attempts to be of a derived type if possible,
+        first on the left and then on the right. If not possible, then it will be a PhysicalQuantity.
+        (This only makes sense for operations that require them to be of the same dimensions.)"""
         if self.dimension != other.dimension:
-            raise IncompatibleUnitsError        
-        result = PhysicalQuantity(self.dimension)
+            raise IncompatibleUnitsError # Type coercion: make sure
+        if type(self) != PhysicalQuantity:
+            result = type(self)()
+        elif type(other) != PhysicalQuantity:
+            result = type(other)()
+        else:
+            result = PhysicalQuantity(self.dimension)
+        return result
+
+    def __add__(self, other):
+        result = self.create_coerced_type(other)
         result._amount_in_basic_units = self._amount_in_basic_units + other._amount_in_basic_units
         return result
         
     def __sub__(self, other):
-        if self.dimension != other.dimension:
-            raise IncompatibleUnitsError        
-        result = PhysicalQuantity(self.dimension)
+        result = self.create_coerced_type(other)
         result._amount_in_basic_units = self._amount_in_basic_units - other._amount_in_basic_units
         return result
 
