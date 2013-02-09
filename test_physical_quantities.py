@@ -1,7 +1,7 @@
 from __future__ import division
 
 import unittest
-from physical_quantities import PhysicalQuantity, Mass, Distance, Time, Speed
+from physical_quantities import PhysicalQuantity, Mass, Distance, Time, Speed, Temperature
 from physical_quantities import BadInputError, BadUnitDictionaryError, IncompatibleUnitsError
 from dimension import Dimension
 
@@ -294,7 +294,29 @@ class TestTime(unittest.TestCase):
         self.assertEqual(t.str, "1:01:01")
         t = Time("0.1 s")
         self.assertEqual(t.str, "00:00")
+
+
+class TestTemperature(unittest.TestCase):
+    """Tests for the Temperature class."""
+    # kelvin, rankine, celsius, fahrenheit 
+    known_values = [
+                    [273.15, 491.67, 0, 32],
+                    [373.15, 671.67, 100, 212]]
+    
+    kelvins_in = {'K': 1, 'R': 5/9 }
         
+    def test_create_simple_temperatures(self):
+        """Simple temperatures."""
+        for unit,kelvins in self.kelvins_in.iteritems():
+            t = Temperature('1' + unit) # create "1x" where x is the unit
+            self.assertEqual(t['K'], kelvins) # the seconds should be correct
+            
+    def test_consistency(self):
+        """In its own units, the value should be 1."""
+        for unit in self.kelvins_in.keys():
+            t = Temperature('1' + unit) # create "1x" where x is the unit
+            self.assertEqual(t[unit], 1)
+            
 # Test derived quantities
     
 class TestSpeed(unittest.TestCase):

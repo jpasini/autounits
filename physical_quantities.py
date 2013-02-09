@@ -252,6 +252,15 @@ class Time(PhysicalQuantity):
         return result
         
 
+class Temperature(PhysicalQuantity):
+    _dim = Dimension(Theta = 1)
+    def __init__(self, value = None):    
+        PhysicalQuantity.__init__(self, Temperature._dim, value)        
+
+
+# Some important derived quantities        
+
+
 class Speed(PhysicalQuantity):
     _dim = Dimension(L = 1, T = -1)
     def __init__(self, value = None):    
