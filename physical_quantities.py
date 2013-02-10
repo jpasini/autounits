@@ -112,7 +112,10 @@ class PhysicalQuantityStringParser(object):
             return a[0]
         else:
             return a[0]*a[1]
-        
+
+# mapping from dimension strings to derived types
+mapping_to_derived_types = {}
+
 from functools import total_ordering
 
 @total_ordering
@@ -187,7 +190,22 @@ class PhysicalQuantity(object):
         if self.dimension != other.dimension:
             raise IncompatibleUnitsError
         return self._amount_in_basic_units < other._amount_in_basic_units
+
+    @classmethod
+    def get_correct_type(cls, dimension):
+        """Return the type that matches "dimension", or else return PhysicalQuantity."""
+        dimension_str = str(dimension)
+        try:
+            return mapping_to_derived_types[dimension_str]
+        except KeyError:
+            return lambda: PhysicalQuantity(dimension) # create a function that can be called without arguments 
     
+    @classmethod
+    def register_type(cls):
+        dimension_str = str(cls._dim)
+        if dimension_str not in mapping_to_derived_types:
+            mapping_to_derived_types[dimension_str] = cls
+            
     def create_coerced_type(self, other):
         """For some binary operations: the result attempts to be of a derived type if possible,
         first on the left and then on the right. If not possible, then it will be a PhysicalQuantity.
@@ -213,17 +231,23 @@ class PhysicalQuantity(object):
         return result
 
     def __mul__(self, other):
-        result = PhysicalQuantity(self.dimension*other.dimension)
+        new_dimension = self.dimension*other.dimension
+        new_type = self.get_correct_type(new_dimension)
+        result = new_type()
         result._amount_in_basic_units = self._amount_in_basic_units*other._amount_in_basic_units
         return result
         
     def __div__(self, other):
-        result = PhysicalQuantity(self.dimension/other.dimension)
+        new_dimension = self.dimension/other.dimension
+        new_type = self.get_correct_type(new_dimension)
+        result = new_type()
         result._amount_in_basic_units = self._amount_in_basic_units/other._amount_in_basic_units
         return result
         
     def __truediv__(self, other):
-        result = PhysicalQuantity(self.dimension/other.dimension)
+        new_dimension = self.dimension/other.dimension
+        new_type = self.get_correct_type(new_dimension)
+        result = new_type()
         result._amount_in_basic_units = self._amount_in_basic_units/other._amount_in_basic_units
         return result
         
@@ -299,3 +323,6 @@ class Speed(PhysicalQuantity):
         # Cast is important to make the "str" method available.
         return Time(distance / self)
         
+# Initialize by registering all derived types
+for derivedclass in [Mass, Distance, Time, Temperature, Speed]:
+    derivedclass.register_type()
