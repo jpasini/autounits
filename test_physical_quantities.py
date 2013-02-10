@@ -426,6 +426,15 @@ class TestCombinedDimensions(unittest.TestCase):
         self.assertEqual(type(d/t), Speed)
         v = Speed("10mi/hr")
         self.assertEqual(type(v*t), Distance)
+        # Note: this doesn't work for a quantity explicitly defined as a PhysicalQuantity
+        T1 = Temperature("3 K")
+        T2 = PhysicalQuantity(Dimension(Theta = 1), "3 K")
+        self.assertEqual(T1, T2)
+        self.assertEqual(type(T1), Temperature)
+        self.assertEqual(type(T2), PhysicalQuantity)
+        # But a multiplication or division by a dimensionless quantity should fix that
+        T3 = T2/PhysicalQuantity(Dimension(), "1")
+        self.assertEqual(type(T3), Temperature)
         
         
 if __name__ == '__main__':
