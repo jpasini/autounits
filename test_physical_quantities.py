@@ -419,6 +419,13 @@ class TestCombinedDimensions(unittest.TestCase):
         self.assertEqual(type(s + d/t), Speed)
         self.assertEqual(type(d/t + s), Speed)
         
+    def test_type_guessing_in_general(self):
+        """The library should find the proper type depending on dimensions."""
+        d = Distance("10m")
+        t = Time("5s")
+        self.assertEqual(type(d/t), Speed)
+        v = Speed("10mi/hr")
+        self.assertEqual(type(v*t), Distance)
         
         
 if __name__ == '__main__':
