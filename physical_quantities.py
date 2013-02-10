@@ -113,13 +113,13 @@ class PhysicalQuantityStringParser(object):
         else:
             return a[0]*a[1]
 
-# mapping from dimension strings to derived types
-mapping_to_derived_types = {}
-
 from functools import total_ordering
 
 @total_ordering
 class PhysicalQuantity(object):
+    # mapping from dimension strings to derived types
+    _mapping_to_derived_types = {}
+
     # For caching:
     _parsers = {}
     _default_units = {}
@@ -196,15 +196,15 @@ class PhysicalQuantity(object):
         """Return the type that matches "dimension", or else return PhysicalQuantity."""
         dimension_str = str(dimension)
         try:
-            return mapping_to_derived_types[dimension_str]
+            return cls._mapping_to_derived_types[dimension_str]
         except KeyError:
             return lambda: PhysicalQuantity(dimension) # create a function that can be called without arguments 
     
     @classmethod
     def register_type(cls):
         dimension_str = str(cls._dim)
-        if dimension_str not in mapping_to_derived_types:
-            mapping_to_derived_types[dimension_str] = cls
+        if dimension_str not in cls._mapping_to_derived_types:
+            cls._mapping_to_derived_types[dimension_str] = cls
             
     def __add__(self, other):
         if self.dimension != other.dimension:
