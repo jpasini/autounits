@@ -5,6 +5,8 @@ Library of physical quantities, with automatic unit conversion.
 
 from __future__ import division
 
+from numbers import Number
+
 class PhysicalQuantityError(Exception): pass
 class BadInputError(PhysicalQuantityError): pass
 class BadUnitDictionaryError(PhysicalQuantityError): pass
@@ -225,6 +227,17 @@ class PhysicalQuantity(object):
         return result
 
     def __mul__(self, other):
+        if isinstance(other, Number):
+            other = PhysicalQuantity(Dimension(), "%s" % other)
+        new_dimension = self.dimension*other.dimension
+        new_type = self.get_correct_type(new_dimension)
+        result = new_type()
+        result._amount_in_basic_units = self._amount_in_basic_units*other._amount_in_basic_units
+        return result
+        
+    def __rmul__(self, other):
+        if isinstance(other, Number):
+            other = PhysicalQuantity(Dimension(), "%s" % other)
         new_dimension = self.dimension*other.dimension
         new_type = self.get_correct_type(new_dimension)
         result = new_type()
@@ -232,19 +245,41 @@ class PhysicalQuantity(object):
         return result
         
     def __div__(self, other):
+        if isinstance(other, Number):
+            other = PhysicalQuantity(Dimension(), "%s" % other)
         new_dimension = self.dimension/other.dimension
         new_type = self.get_correct_type(new_dimension)
         result = new_type()
         result._amount_in_basic_units = self._amount_in_basic_units/other._amount_in_basic_units
+        return result
+        
+    def __rdiv__(self, other):
+        if isinstance(other, Number):
+            other = PhysicalQuantity(Dimension(), "%s" % other)
+        new_dimension = other.dimension/self.dimension
+        new_type = self.get_correct_type(new_dimension)
+        result = new_type()
+        result._amount_in_basic_units = other._amount_in_basic_units/self._amount_in_basic_units
         return result
         
     def __truediv__(self, other):
+        if isinstance(other, Number):
+            other = PhysicalQuantity(Dimension(), "%s" % other)
         new_dimension = self.dimension/other.dimension
         new_type = self.get_correct_type(new_dimension)
         result = new_type()
         result._amount_in_basic_units = self._amount_in_basic_units/other._amount_in_basic_units
         return result
-        
+
+    def __rtruediv__(self, other):
+        if isinstance(other, Number):
+            other = PhysicalQuantity(Dimension(), "%s" % other)
+        new_dimension = other.dimension/self.dimension
+        new_type = self.get_correct_type(new_dimension)
+        result = new_type()
+        result._amount_in_basic_units = other._amount_in_basic_units/self._amount_in_basic_units
+        return result
+    
 
 class Mass(PhysicalQuantity):
     _dim = Dimension(M = 1)

@@ -311,7 +311,7 @@ class TestTemperature(unittest.TestCase):
         """Simple temperatures."""
         for unit,kelvins in self.kelvins_in.iteritems():
             t = Temperature('1' + unit) # create "1x" where x is the unit
-            self.assertEqual(t['K'], kelvins) # the seconds should be correct
+            self.assertEqual(t['K'], kelvins)
             
     def test_consistency(self):
         """In its own units, the value should be 1."""
@@ -401,6 +401,24 @@ class TestCombinedDimensions(unittest.TestCase):
         self.assertEqual(s1, s2)
         d2 = s2*t # multiplication
         self.assertEqual(d2, d)
+        
+    def test_multiplication_and_division_involving_scalars(self):
+        d1 = Distance("10m")
+        d2 = d1/2
+        self.assertEqual(type(d2), Distance)
+        self.assertEqual(d2['m'], 5)
+        d3 = d1*2 # multiply on the right
+        self.assertEqual(type(d3), Distance)
+        self.assertEqual(d3['m'], 20)
+        d4 = 2*d1 # multiply on the left
+        self.assertEqual(type(d4), Distance)
+        self.assertEqual(d4['m'], 20)
+        t1 = Time("4hr")
+        rate = 8/t1
+        self.assertEqual(rate["1/hr"], 2)
+        t2 = 8/rate
+        self.assertEqual(type(t2), Time)
+        self.assertEqual(t2, t1)
         
     def test_type_coercion_on_addition_and_subtraction(self):
         """A PhysicalQuantity, when added/subtracted to/from a Time becomes a Time."""
