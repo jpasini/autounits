@@ -434,6 +434,12 @@ class TestCombinedDimensions(unittest.TestCase):
         v5 = 3 - v1
         self.assertEqual(type(v5), type(v1))
         self.assertEqual(v5['1'], 2)
+        # this won't work with other dimensions
+        d = Distance("3m")
+        self.assertRaises(IncompatibleUnitsError, d.__add__, 4)
+        self.assertRaises(IncompatibleUnitsError, d.__radd__, 4)
+        self.assertRaises(IncompatibleUnitsError, d.__sub__, 4)
+        self.assertRaises(IncompatibleUnitsError, d.__rsub__, 4)
         
         
     def test_type_coercion_on_addition_and_subtraction(self):
