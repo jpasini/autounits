@@ -420,6 +420,22 @@ class TestCombinedDimensions(unittest.TestCase):
         self.assertEqual(type(t2), Time)
         self.assertEqual(t2, t1)
         
+    def test_addition_and_subtraction_involving_scalars(self):
+        v1 = PhysicalQuantity(Dimension(), "1")
+        v2 = v1 + 2
+        self.assertEqual(type(v2), type(v1))
+        self.assertEqual(v2['1'], 3)
+        v3 = 2 + v1
+        self.assertEqual(type(v3), type(v1))
+        self.assertEqual(v3['1'], 3)
+        v4 = v1 - 3
+        self.assertEqual(type(v4), type(v1))
+        self.assertEqual(v4['1'], -2)
+        v5 = 3 - v1
+        self.assertEqual(type(v5), type(v1))
+        self.assertEqual(v5['1'], 2)
+        
+        
     def test_type_coercion_on_addition_and_subtraction(self):
         """A PhysicalQuantity, when added/subtracted to/from a Time becomes a Time."""
         t1 = Time("5s")

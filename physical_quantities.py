@@ -209,6 +209,19 @@ class PhysicalQuantity(object):
             cls._mapping_to_derived_types[dimension_str] = cls
             
     def __add__(self, other):
+        if isinstance(other, Number):
+            other = PhysicalQuantity(Dimension(), "%s" % other)
+        if self.dimension != other.dimension:
+            raise IncompatibleUnitsError
+        new_dimension = self.dimension
+        new_type = self.get_correct_type(new_dimension)
+        result = new_type()
+        result._amount_in_basic_units = self._amount_in_basic_units + other._amount_in_basic_units
+        return result
+        
+    def __radd__(self, other):
+        if isinstance(other, Number):
+            other = PhysicalQuantity(Dimension(), "%s" % other)
         if self.dimension != other.dimension:
             raise IncompatibleUnitsError
         new_dimension = self.dimension
@@ -218,12 +231,25 @@ class PhysicalQuantity(object):
         return result
         
     def __sub__(self, other):
+        if isinstance(other, Number):
+            other = PhysicalQuantity(Dimension(), "%s" % other)
         if self.dimension != other.dimension:
             raise IncompatibleUnitsError
         new_dimension = self.dimension
         new_type = self.get_correct_type(new_dimension)
         result = new_type()
         result._amount_in_basic_units = self._amount_in_basic_units - other._amount_in_basic_units
+        return result
+
+    def __rsub__(self, other):
+        if isinstance(other, Number):
+            other = PhysicalQuantity(Dimension(), "%s" % other)
+        if self.dimension != other.dimension:
+            raise IncompatibleUnitsError
+        new_dimension = self.dimension
+        new_type = self.get_correct_type(new_dimension)
+        result = new_type()
+        result._amount_in_basic_units = other._amount_in_basic_units - self._amount_in_basic_units 
         return result
 
     def __mul__(self, other):
