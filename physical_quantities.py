@@ -206,27 +206,21 @@ class PhysicalQuantity(object):
         if dimension_str not in mapping_to_derived_types:
             mapping_to_derived_types[dimension_str] = cls
             
-    def create_coerced_type(self, other):
-        """For some binary operations: the result attempts to be of a derived type if possible,
-        first on the left and then on the right. If not possible, then it will be a PhysicalQuantity.
-        (This only makes sense for operations that require them to be of the same dimensions.)"""
-        if self.dimension != other.dimension:
-            raise IncompatibleUnitsError # Type coercion: make sure
-        if type(self) != PhysicalQuantity:
-            result = type(self)()
-        elif type(other) != PhysicalQuantity:
-            result = type(other)()
-        else:
-            result = PhysicalQuantity(self.dimension)
-        return result
-
     def __add__(self, other):
-        result = self.create_coerced_type(other)
+        if self.dimension != other.dimension:
+            raise IncompatibleUnitsError
+        new_dimension = self.dimension
+        new_type = self.get_correct_type(new_dimension)
+        result = new_type()
         result._amount_in_basic_units = self._amount_in_basic_units + other._amount_in_basic_units
         return result
         
     def __sub__(self, other):
-        result = self.create_coerced_type(other)
+        if self.dimension != other.dimension:
+            raise IncompatibleUnitsError
+        new_dimension = self.dimension
+        new_type = self.get_correct_type(new_dimension)
+        result = new_type()
         result._amount_in_basic_units = self._amount_in_basic_units - other._amount_in_basic_units
         return result
 
@@ -320,8 +314,7 @@ class Speed(PhysicalQuantity):
         
     def pace(self, distance):
         """Return time to cover given distance."""
-        # Cast is important to make the "str" method available.
-        return Time(distance / self)
+        return distance / self
         
 # Initialize by registering all derived types
 for derivedclass in [Mass, Distance, Time, Temperature, Speed]:
