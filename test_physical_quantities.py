@@ -1,7 +1,7 @@
 from __future__ import division
 
 import unittest
-from physical_quantities import PhysicalQuantity, Mass, Distance, Time, Speed, Temperature
+from physical_quantities import PhysicalQuantity, Dimensionless, Mass, Distance, Time, Charge, Temperature, Speed
 from physical_quantities import BadInputError, BadUnitDictionaryError, IncompatibleUnitsError
 from dimension import Dimension
 
@@ -297,6 +297,14 @@ class TestTime(unittest.TestCase):
         t = Time("0.1 s")
         self.assertEqual(t.str, "00:00")
 
+class TestCharge(unittest.TestCase):
+    """Tests for the Charge class."""
+
+    def test_create_simple_charges(self):
+        """Simple charges."""
+        q = Charge("3 coulomb")
+        self.assertEqual(q['C'], 3)
+    
 
 class TestTemperature(unittest.TestCase):
     """Tests for the Temperature class."""
@@ -421,7 +429,7 @@ class TestCombinedDimensions(unittest.TestCase):
         self.assertEqual(t2, t1)
         
     def test_addition_and_subtraction_involving_scalars(self):
-        v1 = PhysicalQuantity(Dimension(), "1")
+        v1 = Dimensionless("1")
         v2 = v1 + 2
         self.assertEqual(type(v2), type(v1))
         self.assertEqual(v2['1'], 3)
@@ -466,6 +474,11 @@ class TestCombinedDimensions(unittest.TestCase):
         self.assertEqual(type(d/t), Speed)
         v = Speed("10mi/hr")
         self.assertEqual(type(v*t), Distance)
+        # charge density
+        rho = PhysicalQuantity(Dimension(L = -3, Q = 1), "4C/m^3")
+        q = rho*d*d*d
+        self.assertEqual(type(q), Charge)
+        self.assertEqual(q['C'], 4000) 
         # Note: this doesn't work for a quantity explicitly defined as a PhysicalQuantity
         T1 = Temperature("3 K")
         T2 = PhysicalQuantity(Dimension(Theta = 1), "3 K")
@@ -475,6 +488,7 @@ class TestCombinedDimensions(unittest.TestCase):
         # But a multiplication or division by a dimensionless quantity should fix that
         T3 = T2/PhysicalQuantity(Dimension(), "1")
         self.assertEqual(type(T3), Temperature)
+        
         
         
 if __name__ == '__main__':

@@ -305,7 +305,11 @@ class PhysicalQuantity(object):
         result = new_type()
         result._amount_in_basic_units = other._amount_in_basic_units/self._amount_in_basic_units
         return result
-    
+
+class Dimensionless(PhysicalQuantity):
+    _dim = Dimension()
+    def __init__(self, value = None):
+        super(Dimensionless, self).__init__(Dimensionless._dim, value)
 
 class Mass(PhysicalQuantity):
     _dim = Dimension(M = 1)
@@ -339,6 +343,12 @@ class Time(PhysicalQuantity):
             result = result + str(hours) + ":"
         result = result + '{0:02d}:{1:02d}'.format(mins,secs)
         return result
+
+
+class Charge(PhysicalQuantity):
+    _dim = Dimension(Q = 1)
+    def __init__(self, value = None):
+        super(Charge, self).__init__(Charge._dim, value)        
         
 
 class Temperature(PhysicalQuantity):
@@ -378,5 +388,5 @@ class Speed(PhysicalQuantity):
         return distance / self
         
 # Initialize by registering all derived types
-for derivedclass in [Mass, Distance, Time, Temperature, Speed]:
+for derivedclass in [Dimensionless, Mass, Distance, Time, Charge, Temperature, Speed]:
     derivedclass.register_type()
