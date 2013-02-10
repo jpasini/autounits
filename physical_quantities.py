@@ -5,6 +5,8 @@ Library of physical quantities, with automatic unit conversion.
 
 from __future__ import division
 
+from numbers import Number
+
 class PhysicalQuantityError(Exception): pass
 class BadInputError(PhysicalQuantityError): pass
 class BadUnitDictionaryError(PhysicalQuantityError): pass
@@ -112,11 +114,14 @@ class PhysicalQuantityStringParser(object):
             return a[0]
         else:
             return a[0]*a[1]
-        
+
 from functools import total_ordering
 
 @total_ordering
 class PhysicalQuantity(object):
+    # mapping from dimension strings to derived types
+    _mapping_to_derived_types = {}
+
     # For caching:
     _parsers = {}
     _default_units = {}
@@ -187,42 +192,105 @@ class PhysicalQuantity(object):
         if self.dimension != other.dimension:
             raise IncompatibleUnitsError
         return self._amount_in_basic_units < other._amount_in_basic_units
+
+    @classmethod
+    def get_correct_type(cls, dimension):
+        """Return the type that matches "dimension", or else return PhysicalQuantity."""
+        dimension_str = str(dimension)
+        try:
+            return cls._mapping_to_derived_types[dimension_str]
+        except KeyError:
+            return lambda: PhysicalQuantity(dimension) # create a function that can be called without arguments 
     
+    @classmethod
+    def register_type(cls):
+        dimension_str = str(cls._dim)
+        if dimension_str not in cls._mapping_to_derived_types:
+            cls._mapping_to_derived_types[dimension_str] = cls
+            
     def __add__(self, other):
         if self.dimension != other.dimension:
-            raise IncompatibleUnitsError        
-        result = PhysicalQuantity(self.dimension)
+            raise IncompatibleUnitsError
+        new_dimension = self.dimension
+        new_type = self.get_correct_type(new_dimension)
+        result = new_type()
         result._amount_in_basic_units = self._amount_in_basic_units + other._amount_in_basic_units
         return result
         
     def __sub__(self, other):
         if self.dimension != other.dimension:
-            raise IncompatibleUnitsError        
-        result = PhysicalQuantity(self.dimension)
+            raise IncompatibleUnitsError
+        new_dimension = self.dimension
+        new_type = self.get_correct_type(new_dimension)
+        result = new_type()
         result._amount_in_basic_units = self._amount_in_basic_units - other._amount_in_basic_units
         return result
 
     def __mul__(self, other):
-        result = PhysicalQuantity(self.dimension*other.dimension)
+        if isinstance(other, Number):
+            other = PhysicalQuantity(Dimension(), "%s" % other)
+        new_dimension = self.dimension*other.dimension
+        new_type = self.get_correct_type(new_dimension)
+        result = new_type()
+        result._amount_in_basic_units = self._amount_in_basic_units*other._amount_in_basic_units
+        return result
+        
+    def __rmul__(self, other):
+        if isinstance(other, Number):
+            other = PhysicalQuantity(Dimension(), "%s" % other)
+        new_dimension = self.dimension*other.dimension
+        new_type = self.get_correct_type(new_dimension)
+        result = new_type()
         result._amount_in_basic_units = self._amount_in_basic_units*other._amount_in_basic_units
         return result
         
     def __div__(self, other):
-        result = PhysicalQuantity(self.dimension/other.dimension)
+        if isinstance(other, Number):
+            other = PhysicalQuantity(Dimension(), "%s" % other)
+        new_dimension = self.dimension/other.dimension
+        new_type = self.get_correct_type(new_dimension)
+        result = new_type()
         result._amount_in_basic_units = self._amount_in_basic_units/other._amount_in_basic_units
+        return result
+        
+    def __rdiv__(self, other):
+        if isinstance(other, Number):
+            other = PhysicalQuantity(Dimension(), "%s" % other)
+        new_dimension = other.dimension/self.dimension
+        new_type = self.get_correct_type(new_dimension)
+        result = new_type()
+        result._amount_in_basic_units = other._amount_in_basic_units/self._amount_in_basic_units
         return result
         
     def __truediv__(self, other):
-        result = PhysicalQuantity(self.dimension/other.dimension)
+        if isinstance(other, Number):
+            other = PhysicalQuantity(Dimension(), "%s" % other)
+        new_dimension = self.dimension/other.dimension
+        new_type = self.get_correct_type(new_dimension)
+        result = new_type()
         result._amount_in_basic_units = self._amount_in_basic_units/other._amount_in_basic_units
         return result
-        
+
+    def __rtruediv__(self, other):
+        if isinstance(other, Number):
+            other = PhysicalQuantity(Dimension(), "%s" % other)
+        new_dimension = other.dimension/self.dimension
+        new_type = self.get_correct_type(new_dimension)
+        result = new_type()
+        result._amount_in_basic_units = other._amount_in_basic_units/self._amount_in_basic_units
+        return result
+    
+
+class Mass(PhysicalQuantity):
+    _dim = Dimension(M = 1)
+    def __init__(self, value = None):
+        super(Mass, self).__init__(Mass._dim, value)
 
 
 class Distance(PhysicalQuantity):
     _dim = Dimension(L = 1)
     def __init__(self, value = None):
-        PhysicalQuantity.__init__(self, Distance._dim, value)
+        super(Distance, self).__init__(Distance._dim, value)
         
 
 class Time(PhysicalQuantity):
@@ -231,7 +299,7 @@ class Time(PhysicalQuantity):
     _min_in_secs = PhysicalQuantity(_dim, "1 min")['s']
 
     def __init__(self, value = None):
-        PhysicalQuantity.__init__(self, Time._dim, value)
+        super(Time, self).__init__(Time._dim, value)
         
     @property
     def str(self):
@@ -247,13 +315,42 @@ class Time(PhysicalQuantity):
         return result
         
 
+class Temperature(PhysicalQuantity):
+    _dim = Dimension(Theta = 1)
+    def __init__(self, value = None):    
+        super(Temperature, self).__init__(Temperature._dim, value)        
+
+    def __getitem__(self, key):
+        if key == 'C':
+            K = self._amount_in_basic_units/self._parser.flat_units_dictionary['K']
+            return K - 273.15
+        elif key == 'F':
+            C = self._amount_in_basic_units/self._parser.flat_units_dictionary['K'] - 273.15
+            return C*9/5 + 32
+        else:
+            return super(Temperature, self).__getitem__(key)
+            
+    def __setitem__(self, key, value):
+        if key == 'C':
+            self._amount_in_basic_units = (value + 273.15)*self._parser.flat_units_dictionary['K'] 
+        elif key == 'F':
+            self._amount_in_basic_units = ((value - 32)*5/9 + 273.15)/self._parser.flat_units_dictionary['K']
+        else:
+            super(Temperature, self).__setitem__(key, value)
+
+
+# Some important derived quantities        
+
+
 class Speed(PhysicalQuantity):
     _dim = Dimension(L = 1, T = -1)
     def __init__(self, value = None):    
-        PhysicalQuantity.__init__(self, Speed._dim, value)
+        super(Speed, self).__init__(Speed._dim, value)
         
     def pace(self, distance):
         """Return time to cover given distance."""
-        # Cast is important to make the "str" method available.
-        return Time(distance / self)
+        return distance / self
         
+# Initialize by registering all derived types
+for derivedclass in [Mass, Distance, Time, Temperature, Speed]:
+    derivedclass.register_type()

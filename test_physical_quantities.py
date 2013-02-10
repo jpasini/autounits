@@ -1,7 +1,7 @@
 from __future__ import division
 
 import unittest
-from physical_quantities import PhysicalQuantity, Distance, Time, Speed
+from physical_quantities import PhysicalQuantity, Mass, Distance, Time, Speed, Temperature
 from physical_quantities import BadInputError, BadUnitDictionaryError, IncompatibleUnitsError
 from dimension import Dimension
 
@@ -139,12 +139,76 @@ class TestPhysicalQuantity(unittest.TestCase):
         self.assertEqual(str(p), "1000 m/s")
         p = PhysicalQuantity(Dimension(Q = 1), "4 coulomb")
         self.assertEqual(str(p), "4 C")
+        p = Temperature("4 kelvin")
+        self.assertEqual(str(p), "4 K")
         p = Speed("30m/s")/Time("2s")/PhysicalQuantity(Dimension(M = 1), "3kg")
         self.assertEqual(str(p), "5 m/kgs^2")
                 
         
 # Test primitive quantities
         
+class TestMass(unittest.TestCase):
+    """Tests for the Mass class."""
+    kilograms_in = {'kg' : 1, 'kilograms': 1, 'g': 0.001, 'grams': 0.001 }
+        
+    def test_create_simple_masses(self):
+        """Simple masses."""
+        # Check consistency
+        for unit,kilograms in self.kilograms_in.iteritems():
+            m = Mass('1' + unit) # create "1x" where x is the unit
+            self.assertEqual(m['kg'], kilograms) # the kilograms should be correct
+        # Check creating from other distances
+        m1 = Mass("1 kg")
+        m2 = Mass(m1)
+        self.assertEqual(m1['kg'], m2['kg'])
+        # Check creating from another quantity with same dimensions
+        m1 = PhysicalQuantity(Dimension(M = 1), "1 kg")
+        m2 = Mass(m1)
+        self.assertEqual(m1['kg'], m2['kg'])
+        # Check creating from another quantity with different dimensions
+        t = PhysicalQuantity(Dimension(T = 1), "1 s")
+        self.assertRaises(IncompatibleUnitsError, Mass, t)       
+        
+            
+    def test_consistency(self):
+        """In its own units, the value should be 1."""
+        for unit in self.kilograms_in.keys():
+            m = Mass('1' + unit) # create "1x" where x is the unit
+            self.assertEqual(m[unit], 1)
+            
+    def test_mass_adding(self):
+        """Test adding masses."""
+        m1 = Mass("10 kg")
+        m2 = Mass("300 g")
+        m3 = m1 + m2
+        self.assertEqual(m1.dimension, m3.dimension) # type is the same
+        self.assertEqual(m3['kg'], 10.3)
+        
+    def test_mass_subtracting(self):
+        """Test subtracting masses."""
+        m1 = Mass("10 kg")
+        m2 = Mass("300 g")
+        m3 = m1 - m2
+        self.assertEqual(m1.dimension, m3.dimension) # type is the same
+        self.assertAlmostEqual(m3['g'], 9700)
+        
+    def test_for_mass_equality(self):
+        """Test that masses are only compared by length."""
+        m1 = Mass("1g")
+        m2 = Mass("0.001kg")
+        self.assertEqual(m1['kg'], m2['kg']) # sanity check before the real test
+        self.assertEqual(m1, m2)
+        
+    def test_creating_from_other_mass(self):
+        """I can create a mass from another."""
+        m1 = Mass("10 kg")
+        m2 = Mass(m1)
+        self.assertEqual(m1, m2)
+        m2['kg'] = 2
+        self.assertEqual(m2['kg'], 2)
+        self.assertEqual(m1['kg'], 10) # check that we didn't modify the original one
+        
+
 class TestDistance(unittest.TestCase):
     """Tests for the Distance class."""
     meters_in = {'m' : 1, 'meters': 1, 'mi': 1609.344, 'miles': 1609.344, 'km': 1000, 'kilometers': 1000, 'marathon': 42194.988 }
@@ -232,8 +296,59 @@ class TestTime(unittest.TestCase):
         self.assertEqual(t.str, "1:01:01")
         t = Time("0.1 s")
         self.assertEqual(t.str, "00:00")
+
+
+class TestTemperature(unittest.TestCase):
+    """Tests for the Temperature class."""
+    # kelvin, rankine, celsius, fahrenheit 
+    known_values = [
+                    [273.15, 491.67, 0, 32],
+                    [373.15, 671.67, 100, 212]]
+    
+    kelvins_in = {'K': 1, 'R': 5/9 }
         
+    def test_create_simple_temperatures(self):
+        """Simple temperatures."""
+        for unit,kelvins in self.kelvins_in.iteritems():
+            t = Temperature('1' + unit) # create "1x" where x is the unit
+            self.assertEqual(t['K'], kelvins)
+            
+    def test_consistency(self):
+        """In its own units, the value should be 1."""
+        for unit in self.kelvins_in.keys():
+            t = Temperature('1' + unit) # create "1x" where x is the unit
+            self.assertEqual(t[unit], 1)
+            
+    def test_known_values(self):
+        t1 = Temperature()
+        t2 = Temperature()
+        t3 = Temperature()
+        t4 = Temperature()
+        for K, R, C, F in self.known_values:
+            t1['K'] = K
+            self.assertAlmostEqual(t1['K'], K)
+            self.assertAlmostEqual(t1['R'], R)
+            self.assertAlmostEqual(t1['C'], C)
+            self.assertAlmostEqual(t1['F'], F)
+            t2['R'] = R
+            self.assertAlmostEqual(t2['K'], K)
+            self.assertAlmostEqual(t2['R'], R)
+            self.assertAlmostEqual(t2['C'], C)
+            self.assertAlmostEqual(t2['F'], F)
+            t3['C'] = C
+            self.assertAlmostEqual(t3['K'], K)
+            self.assertAlmostEqual(t3['R'], R)
+            self.assertAlmostEqual(t3['C'], C)
+            self.assertAlmostEqual(t3['F'], F)
+            t4['F'] = F
+            self.assertAlmostEqual(t4['K'], K)
+            self.assertAlmostEqual(t4['R'], R)
+            self.assertAlmostEqual(t4['C'], C)
+            self.assertAlmostEqual(t4['F'], F)
+            
+
 # Test derived quantities
+
     
 class TestSpeed(unittest.TestCase):
     """Tests for the Speed class."""
@@ -286,6 +401,58 @@ class TestCombinedDimensions(unittest.TestCase):
         self.assertEqual(s1, s2)
         d2 = s2*t # multiplication
         self.assertEqual(d2, d)
+        
+    def test_multiplication_and_division_involving_scalars(self):
+        d1 = Distance("10m")
+        d2 = d1/2
+        self.assertEqual(type(d2), Distance)
+        self.assertEqual(d2['m'], 5)
+        d3 = d1*2 # multiply on the right
+        self.assertEqual(type(d3), Distance)
+        self.assertEqual(d3['m'], 20)
+        d4 = 2*d1 # multiply on the left
+        self.assertEqual(type(d4), Distance)
+        self.assertEqual(d4['m'], 20)
+        t1 = Time("4hr")
+        rate = 8/t1
+        self.assertEqual(rate["1/hr"], 2)
+        t2 = 8/rate
+        self.assertEqual(type(t2), Time)
+        self.assertEqual(t2, t1)
+        
+    def test_type_coercion_on_addition_and_subtraction(self):
+        """A PhysicalQuantity, when added/subtracted to/from a Time becomes a Time."""
+        t1 = Time("5s")
+        t2 = PhysicalQuantity(Dimension(T = 1), "1 min")
+        self.assertTrue(type(t1) != type(t2)) # sanity check before the real check
+        # coercion on the left & right
+        self.assertEqual(type(t1 + t2), type(t1))
+        self.assertEqual(type(t2 + t1), type(t1))
+        self.assertEqual(type(t1 - t2), type(t1))
+        self.assertEqual(type(t2 - t1), type(t1))
+        # A more complex example
+        s = Speed("3 m/s")
+        d = Distance("4 m")
+        t = Time("4 s")
+        self.assertEqual(type(s + d/t), Speed)
+        self.assertEqual(type(d/t + s), Speed)
+        
+    def test_type_guessing_in_general(self):
+        """The library should find the proper type depending on dimensions."""
+        d = Distance("10m")
+        t = Time("5s")
+        self.assertEqual(type(d/t), Speed)
+        v = Speed("10mi/hr")
+        self.assertEqual(type(v*t), Distance)
+        # Note: this doesn't work for a quantity explicitly defined as a PhysicalQuantity
+        T1 = Temperature("3 K")
+        T2 = PhysicalQuantity(Dimension(Theta = 1), "3 K")
+        self.assertEqual(T1, T2)
+        self.assertEqual(type(T1), Temperature)
+        self.assertEqual(type(T2), PhysicalQuantity)
+        # But a multiplication or division by a dimensionless quantity should fix that
+        T3 = T2/PhysicalQuantity(Dimension(), "1")
+        self.assertEqual(type(T3), Temperature)
         
         
 if __name__ == '__main__':
