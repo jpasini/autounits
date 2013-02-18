@@ -2,6 +2,7 @@ from __future__ import division
 
 import unittest
 from physical_quantities import PhysicalQuantity, Dimensionless, Mass, Distance, Time, Charge, Temperature, Speed
+from physical_quantities import PhysicalQuantityFactory
 from physical_quantities import BadInputError, BadUnitDictionaryError, IncompatibleUnitsError
 from dimension import Dimension
 
@@ -490,6 +491,22 @@ class TestCombinedDimensions(unittest.TestCase):
         self.assertEqual(type(T3), Temperature)
         
         
+class TestFactory(unittest.TestCase):
+    """Creating physical quantities through a factory."""
+    
+    def test_basic_quantities(self):
+        factory = PhysicalQuantityFactory()
+        known_types = [
+                       [Dimension(M = 1), Mass],
+                       [Dimension(L = 1), Distance],
+                       [Dimension(T = 1), Time],
+                       [Dimension(Q = 1), Charge],
+                       [Dimension(Theta = 1), Temperature],
+                       [Dimension(L = 1, T = -1), Speed]
+                       ]
+        for (d,t) in known_types:
+            quantity = factory.new(d)
+            self.assertEqual(type(quantity), t)
         
 if __name__ == '__main__':
     unittest.main()
