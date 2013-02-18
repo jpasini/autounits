@@ -380,7 +380,34 @@ class Speed(PhysicalQuantity):
         """Return time to cover given distance."""
         return distance / self
     
+
+class Energy(PhysicalQuantity):
+    """Energy: Need to define additional synonyms."""
+    
+    _dim = Dimension(M = 1, L = 2, T = -2)
+    _Btu_2_J = 1055.05585
+    
+    def __init__(self, value = None):    
+        super(Energy, self).__init__(Energy._dim, value)
+        
+    def __getitem__(self, key):
+        if key == 'J':
+            return self._amount_in_basic_units/self._parser.flat_units_dictionary['kgm^2/s^2']
+        elif key == 'Btu':
+            return self._amount_in_basic_units/self._parser.flat_units_dictionary['kgm^2/s^2']/self._Btu_2_J
+        else:
+            return super(Energy, self).__getitem__(key)
+            
+    def __setitem__(self, key, value):
+        if key == 'J':
+            self._amount_in_basic_units = value*self._parser.flat_units_dictionary['kgm^2/s^2'] 
+        elif key == 'Btu':
+            self._amount_in_basic_units = value/self._parser.flat_units_dictionary['kgm^2/s^2']*self._Btu_2_J
+        else:
+            super(Energy, self).__setitem__(key, value)
+
+
     
 # Initialize by registering all derived types
-for derivedclass in [Dimensionless, Mass, Distance, Time, Charge, Temperature, Speed]:
+for derivedclass in [Dimensionless, Mass, Distance, Time, Charge, Temperature, Speed, Energy]:
     derivedclass.register_type()

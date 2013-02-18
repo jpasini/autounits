@@ -1,7 +1,8 @@
 from __future__ import division
 
 import unittest
-from physical_quantities import PhysicalQuantity, Dimensionless, Mass, Distance, Time, Charge, Temperature, Speed
+from physical_quantities import PhysicalQuantity, Dimensionless, Mass, Distance, Time, Charge, Temperature
+from physical_quantities import Speed, Energy
 from physical_quantities import PhysicalQuantityFactory
 from physical_quantities import BadInputError, BadUnitDictionaryError, IncompatibleUnitsError
 from dimension import Dimension
@@ -381,6 +382,17 @@ class TestSpeed(unittest.TestCase):
         for speed, distance, pace in known_values:
             s, d, t = Speed(speed), Distance(distance), Time(pace)
             self.assertEqual(s.pace(d)['s'], t['s']) # the seconds should be correct
+            
+class TestEnergy(unittest.TestCase):
+    """Tests for the Energy class."""
+
+    def test_simple_energies(self):
+        """Create a few energies and check the value."""
+        E = Energy('1 kgm^2/s^2')
+        self.assertEqual(E['J'], 1)
+        E['Btu'] = 2.5
+        self.assertEqual(E['Btu'], 2.5)
+        self.assertEqual(E['J'], 2.5*1055.05585)
 
 
 class TestCombinedDimensions(unittest.TestCase):
