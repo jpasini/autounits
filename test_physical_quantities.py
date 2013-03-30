@@ -1,7 +1,9 @@
 from __future__ import division
 
 import unittest
-from physical_quantities import PhysicalQuantity, Mass, Distance, Time, Speed, Temperature
+from physical_quantities import PhysicalQuantity, Dimensionless, Mass, Distance, Time, Charge, Temperature
+from physical_quantities import Speed, Energy
+from physical_quantities import PhysicalQuantityFactory
 from physical_quantities import BadInputError, BadUnitDictionaryError, IncompatibleUnitsError
 from dimension import Dimension
 
@@ -297,6 +299,14 @@ class TestTime(unittest.TestCase):
         t = Time("0.1 s")
         self.assertEqual(t.str, "00:00")
 
+class TestCharge(unittest.TestCase):
+    """Tests for the Charge class."""
+
+    def test_create_simple_charges(self):
+        """Simple charges."""
+        q = Charge("3 coulomb")
+        self.assertEqual(q['C'], 3)
+    
 
 class TestTemperature(unittest.TestCase):
     """Tests for the Temperature class."""
@@ -372,6 +382,17 @@ class TestSpeed(unittest.TestCase):
         for speed, distance, pace in known_values:
             s, d, t = Speed(speed), Distance(distance), Time(pace)
             self.assertEqual(s.pace(d)['s'], t['s']) # the seconds should be correct
+            
+class TestEnergy(unittest.TestCase):
+    """Tests for the Energy class."""
+
+    def test_simple_energies(self):
+        """Create a few energies and check the value."""
+        E = Energy('1 kgm^2/s^2')
+        self.assertEqual(E['J'], 1)
+        E['Btu'] = 2.5
+        self.assertEqual(E['Btu'], 2.5)
+        self.assertEqual(E['J'], 2.5*1055.05585)
 
 
 class TestCombinedDimensions(unittest.TestCase):
@@ -420,6 +441,28 @@ class TestCombinedDimensions(unittest.TestCase):
         self.assertEqual(type(t2), Time)
         self.assertEqual(t2, t1)
         
+    def test_addition_and_subtraction_involving_scalars(self):
+        v1 = Dimensionless("1")
+        v2 = v1 + 2
+        self.assertEqual(type(v2), type(v1))
+        self.assertEqual(v2['1'], 3)
+        v3 = 2 + v1
+        self.assertEqual(type(v3), type(v1))
+        self.assertEqual(v3['1'], 3)
+        v4 = v1 - 3
+        self.assertEqual(type(v4), type(v1))
+        self.assertEqual(v4['1'], -2)
+        v5 = 3 - v1
+        self.assertEqual(type(v5), type(v1))
+        self.assertEqual(v5['1'], 2)
+        # this won't work with other dimensions
+        d = Distance("3m")
+        self.assertRaises(IncompatibleUnitsError, d.__add__, 4)
+        self.assertRaises(IncompatibleUnitsError, d.__radd__, 4)
+        self.assertRaises(IncompatibleUnitsError, d.__sub__, 4)
+        self.assertRaises(IncompatibleUnitsError, d.__rsub__, 4)
+        
+        
     def test_type_coercion_on_addition_and_subtraction(self):
         """A PhysicalQuantity, when added/subtracted to/from a Time becomes a Time."""
         t1 = Time("5s")
@@ -444,6 +487,11 @@ class TestCombinedDimensions(unittest.TestCase):
         self.assertEqual(type(d/t), Speed)
         v = Speed("10mi/hr")
         self.assertEqual(type(v*t), Distance)
+        # charge density
+        rho = PhysicalQuantity(Dimension(L = -3, Q = 1), "4C/m^3")
+        q = rho*d*d*d
+        self.assertEqual(type(q), Charge)
+        self.assertEqual(q['C'], 4000) 
         # Note: this doesn't work for a quantity explicitly defined as a PhysicalQuantity
         T1 = Temperature("3 K")
         T2 = PhysicalQuantity(Dimension(Theta = 1), "3 K")
@@ -454,6 +502,23 @@ class TestCombinedDimensions(unittest.TestCase):
         T3 = T2/PhysicalQuantity(Dimension(), "1")
         self.assertEqual(type(T3), Temperature)
         
+        
+class TestFactory(unittest.TestCase):
+    """Creating physical quantities through a factory."""
+    
+    def test_basic_quantities(self):
+        factory = PhysicalQuantityFactory()
+        known_types = [
+                       [Dimension(M = 1), Mass],
+                       [Dimension(L = 1), Distance],
+                       [Dimension(T = 1), Time],
+                       [Dimension(Q = 1), Charge],
+                       [Dimension(Theta = 1), Temperature],
+                       [Dimension(L = 1, T = -1), Speed]
+                       ]
+        for (d,t) in known_types:
+            quantity = factory.new(d)
+            self.assertEqual(type(quantity), t)
         
 if __name__ == '__main__':
     unittest.main()
