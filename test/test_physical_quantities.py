@@ -1,6 +1,8 @@
 from __future__ import division
 
 import unittest
+import sys
+sys.path.append('../src')
 from physical_quantities import PhysicalQuantity, Dimensionless, Mass, Distance, Time, Charge, Temperature
 from physical_quantities import Speed, Energy
 from physical_quantities import PhysicalQuantityFactory

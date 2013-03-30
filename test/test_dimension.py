@@ -1,6 +1,8 @@
 from __future__ import division
 
 import unittest
+import sys
+sys.path.append('../src')
 from dimension import Dimension, parse_unit_string
 from dimension import DimensionError, IncompatibleDimensionsError
 
