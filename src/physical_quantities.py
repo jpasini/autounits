@@ -147,6 +147,8 @@ class PhysicalQuantity(object):
     _primitive_units['Theta'] = {('K', 'kelvin'): 1, ('R', 'rankine'): 5/9}
     
     def __init__(self, dimension = Dimension(), value = None):
+        """Initialization value may be either a string (to be parsed) or another
+        object of the same dimensions."""
         if type(dimension) != Dimension:
             raise PhysicalQuantityError
 
@@ -208,6 +210,8 @@ class PhysicalQuantity(object):
 
     @classmethod
     def register_type(cls):
+        """Register this class as the one to use when creating objects of these dimensions.
+        (To be called by derived classes)"""
         dimension_str = str(cls._dim)
         if dimension_str not in _mapping_to_derived_types:
             _mapping_to_derived_types[dimension_str] = cls
