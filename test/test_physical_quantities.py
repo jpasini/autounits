@@ -464,6 +464,15 @@ class TestCombinedDimensions(unittest.TestCase):
         self.assertRaises(IncompatibleUnitsError, d.__sub__, 4)
         self.assertRaises(IncompatibleUnitsError, d.__rsub__, 4)
         
+    def test_power(self):
+        """I can raise quantities to integer or fractional powers."""
+        L = Distance("3m")
+        A = L**2
+        self.assertEqual(A, L*L)
+        V = L**3
+        self.assertEqual(V, L*L*L)
+        L2 = A**0.5
+        self.assertEqual(L2, L)
         
     def test_type_coercion_on_addition_and_subtraction(self):
         """A PhysicalQuantity, when added/subtracted to/from a Time becomes a Time."""
