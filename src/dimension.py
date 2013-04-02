@@ -126,6 +126,14 @@ class Dimension(object):
             T = self.T - other.T,
             Q = self.Q - other.Q,
             Theta = self.Theta - other.Theta)
+        
+    def __pow__(self, other):
+        """Raise to integer or fractional powers"""
+        return Dimension(M = self.M*other,
+            L = self.L*other,
+            T = self.T*other,
+            Q = self.Q*other,
+            Theta = self.Theta*other)
 
 def get_number():
     from pyparsing import Word, nums, ParseException

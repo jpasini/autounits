@@ -231,6 +231,24 @@ class TestDimension(unittest.TestCase):
         self.assertEqual(d4.T, -2)
         self.assertEqual(d4.Q, 0)
         self.assertEqual(d4.Theta, 0)
+        
+    def test_raise_to_power_dimensions(self):
+        """Raise dimensions to integer and fractional powers."""
+        d1 = Dimension(L = 4, T = -1)
+        d2 = d1**2
+        self.assertEqual(d2.M, 0)
+        self.assertEqual(d2.L, 8)
+        self.assertEqual(d2.T, -2)
+        self.assertEqual(d2.Q, 0)
+        self.assertEqual(d2.Theta, 0)
+        d3 = d2**0.5
+        self.assertEqual(d3.M, 0)
+        self.assertEqual(d3.L, 4)
+        self.assertEqual(d3.T, -1)
+        self.assertEqual(d3.Q, 0)
+        self.assertEqual(d3.Theta, 0)
+        
+
 
 
 if __name__ == '__main__':
