@@ -395,6 +395,24 @@ class TestEnergy(unittest.TestCase):
         E['Btu'] = 2.5
         self.assertEqual(E['Btu'], 2.5)
         self.assertEqual(E['J'], 2.5*1055.05585)
+        
+    def test_type_guessing(self):
+        """Create from other types, then ensure I can enter using derived units."""
+        m = Mass("2 kg")
+        v = Speed("3 m/s")
+        E = 1/2*m*v*v
+        # Can read in derived units
+        self.assertEqual(E['J'], 1/2*2*3*3)
+        # Can write to derived units
+        E['Btu'] = 2.5
+        self.assertEqual(E['Btu'], 2.5)
+        
+    def test_init_from_derived_unit(self):
+        """I should be able to use all derived units in initialization."""
+        E1 = Energy("2 J")
+        self.assertEqual(E1['J'], 2)
+        E2 = Energy("5 Btu") 
+        self.assertEqual(E2['Btu'], 5)
 
 
 class TestCombinedDimensions(unittest.TestCase):
