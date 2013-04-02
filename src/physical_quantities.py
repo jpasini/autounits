@@ -301,6 +301,9 @@ class PhysicalQuantity(object):
         return result
     
     def __pow__(self, other):
+        if not isinstance(other, Number):
+            # it can only be a dimensionless quantity, so extract the value
+            other = other['1']
         new_dimension = self.dimension**other
         result = PhysicalQuantityFactory().new(new_dimension)
         result._amount_in_basic_units = self._amount_in_basic_units**other

@@ -473,6 +473,20 @@ class TestCombinedDimensions(unittest.TestCase):
         self.assertEqual(V, L*L*L)
         L2 = A**0.5
         self.assertEqual(L2, L)
+        # type guessing works
+        m = Mass("7 kg")
+        v = Speed("11 m/s")
+        E = 1/2*m*v**2
+        self.assertEqual(E['J'], 1/2*7*11*11)
+        
+    def test_power_to_dimensionless_quantities(self):
+        """I can raise quantities to dimensionless quantities."""
+        L1 = Distance("3m")
+        L2 = Distance("6m")
+        A = L1*L2
+        L3 = A**(L1/L2)
+        self.assertEqual(L3['m'], (3*6)**(1/2))
+        
         
     def test_type_coercion_on_addition_and_subtraction(self):
         """A PhysicalQuantity, when added/subtracted to/from a Time becomes a Time."""
