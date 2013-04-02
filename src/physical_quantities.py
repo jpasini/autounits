@@ -299,7 +299,13 @@ class PhysicalQuantity(object):
         result = PhysicalQuantityFactory().new(new_dimension)
         result._amount_in_basic_units = other._amount_in_basic_units/self._amount_in_basic_units
         return result
-
+    
+    def __pow__(self, other):
+        new_dimension = self.dimension**other
+        result = PhysicalQuantityFactory().new(new_dimension)
+        result._amount_in_basic_units = self._amount_in_basic_units**other
+        return result
+    
 
 class Dimensionless(PhysicalQuantity):
     _dim = Dimension()
