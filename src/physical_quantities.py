@@ -164,6 +164,38 @@ class PhysicalQuantityFactory(object):
 # together with the dimensional equivalence
 #    _dimension['E'] = Dimension(M = 1, L = 2, T = -2)
 
+class UnitSystem(object):
+    
+    def __init__(self):
+        # For caching:
+        self._parsers = {}
+        self._default_units = {}
+        # Conversion constants for primitive quantities
+        self._primitive_units = {}
+        self._primitive_units['M'] = {('kg', 'kilogram', 'kilograms'): 1, ('g', 'gr', 'gram', 'grams'): 0.001}
+        self._primitive_units['L'] = {('m', 'meter', 'meters'): 1, ('mi', 'mile', 'miles'): 1609.344, ('km', 'kilometer', 'kilometers'): 1000, 'marathon': 42194.988}
+        self._primitive_units['T'] = {('s', 'sec', 'secs', 'second', 'seconds'): 1, ('min', 'mins', 'minute', 'minutes'): 60, ('hr', 'hrs', 'hour', 'hours'): 3600}
+        self._primitive_units['Q'] = {('C', 'coulomb'): 1}
+        self._primitive_units['Theta'] = {('K', 'kelvin'): 1, ('R', 'rankine'): 5/9}
+    
+    def register_if_not_there(self, dimension):
+        """Register this dimension in the unit system if it's not there already."""
+        if type(dimension) != Dimension:
+            raise PhysicalQuantityError
+        
+        # create the parser if it doesn't exist already. Index by string representation
+        dimension_str = dimension.str()
+        if dimension_str not in self._parsers:
+            self._parsers[dimension_str] = PhysicalQuantityStringParser(dimension, self._primitive_units)
+            
+        # choose default units for printing and store if they're not stored already 
+        if dimension_str not in self._default_units:
+            # choose basic units (something that gives a conversion of 1) and the shortest representation
+            candidates = [k for (k,v) in self._parsers[dimension_str].flat_units_dictionary.iteritems() if v == 1]
+            self._default_units[dimension_str] = min(candidates, key=len)
+        
+_unit_system = UnitSystem()
+
 @total_ordering
 class PhysicalQuantity(object):
 
@@ -183,20 +215,13 @@ class PhysicalQuantity(object):
         object of the same dimensions."""
         if type(dimension) != Dimension:
             raise PhysicalQuantityError
+        
+        _unit_system.register_if_not_there(dimension)
+        dimension_str = dimension.str()
+        self._parser = _unit_system._parsers[dimension_str]
+        self._default_unit_for_printing = _unit_system._default_units[dimension_str]
 
         self.dimension = dimension
-        
-        # create the parser if it doesn't exist already. Index by string representation
-        dimension_str = dimension.str()
-        if dimension_str not in PhysicalQuantity._parsers:
-            PhysicalQuantity._parsers[dimension_str] = PhysicalQuantityStringParser(dimension, PhysicalQuantity._primitive_units)
-        self._parser = PhysicalQuantity._parsers[dimension_str]
-        # choose default units for printing and store if they're not stored already 
-        if dimension_str not in PhysicalQuantity._default_units:
-            # choose basic units (something that gives a conversion of 1) and the shortest representation
-            candidates = [k for (k,v) in self._parser.flat_units_dictionary.iteritems() if v == 1]
-            PhysicalQuantity._default_units[dimension_str] = min(candidates, key=len)
-        self._default_unit_for_printing = PhysicalQuantity._default_units[dimension_str]
         
         self._amount_in_basic_units = None
         if value is not None:
