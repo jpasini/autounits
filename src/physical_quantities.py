@@ -131,6 +131,38 @@ class PhysicalQuantityFactory(object):
         else:
             return _mapping_to_derived_types[dimension_str](value)
         
+# Notes:
+# PhysicalQuantity mixes two concepts: (it does too much!)
+# - It's a physical quantity, but embedded within it is a system of units.
+# - I might be better off creating a separate system of units which is used by physical quantities.
+
+# Once I add a unit for a derived quantity, such as J for energy, the system should allow me
+# to use it in combination with primitive units.
+# For example, Power may be in W, but I should be able to specify it in J/s, even though
+# J was associated later with energy and is not a "primitive" unit. This means that the
+# system of units should have a way of incorporating new units to the primitive set.
+
+# For example, given this primitive set
+#    _primitive_units['M'] = {('kg', 'kilogram'): 1, ('g', 'gr'): 0.001}
+#    _primitive_units['L'] = {('m', 'meter'): 1, ('km', 'kilometer'): 1000}
+#    _primitive_units['T'] = {('s'): 1}
+#    _primitive_units['Q'] = {('C'): 1}
+#    _primitive_units['Theta'] = {('K'): 1}
+# After I add that 1 J = 1 kg m^2/s^2 I now also have these identities
+#     1 kg = 1 J s^2/m^2 
+#     1 m  = 1 J^(1/2) s/kg^(1/2) 
+# and so I could have
+#    _primitive_units['M'] = {('kg', 'kilogram', 'J s^2/m^2'): 1, ('g', 'gr'): 0.001, ('J s^2/km^2'): 1e-6}
+#    _primitive_units['L'] = {('m', 'meter', 'J^(1/2) s/kg^(1/2)'): 1, ('km', 'kilometer'): 1000, ('J^(1/2) s/g^(1/2)'): 1000**0.5}
+#    _primitive_units['T'] = {('s'): 1}
+#    _primitive_units['Q'] = {('C'): 1}
+#    _primitive_units['Theta'] = {('K'): 1}
+# One problem now is that the new "primitive units" are no longer simple tokens.
+# A possible solution would be to expand the unit system, but add equivalences.
+# In other words, I could add this:
+#    _derived_units['E'] = {('J', 'Joule'}: 1, ('Btu'): 1055.05585}
+# together with the dimensional equivalence
+#    _dimension['E'] = Dimension(M = 1, L = 2, T = -2)
 
 @total_ordering
 class PhysicalQuantity(object):
