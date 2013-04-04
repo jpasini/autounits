@@ -198,17 +198,6 @@ _unit_system = UnitSystem()
 
 @total_ordering
 class PhysicalQuantity(object):
-
-    # For caching:
-    _parsers = {}
-    _default_units = {}
-    # Conversion constants for primitive quantities
-    _primitive_units = {}
-    _primitive_units['M'] = {('kg', 'kilogram', 'kilograms'): 1, ('g', 'gr', 'gram', 'grams'): 0.001}
-    _primitive_units['L'] = {('m', 'meter', 'meters'): 1, ('mi', 'mile', 'miles'): 1609.344, ('km', 'kilometer', 'kilometers'): 1000, 'marathon': 42194.988}
-    _primitive_units['T'] = {('s', 'sec', 'secs', 'second', 'seconds'): 1, ('min', 'mins', 'minute', 'minutes'): 60, ('hr', 'hrs', 'hour', 'hours'): 3600}
-    _primitive_units['Q'] = {('C', 'coulomb'): 1}
-    _primitive_units['Theta'] = {('K', 'kelvin'): 1, ('R', 'rankine'): 5/9}
     
     def __init__(self, dimension = Dimension(), value = None):
         """Initialization value may be either a string (to be parsed) or another
