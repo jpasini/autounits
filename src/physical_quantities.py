@@ -207,6 +207,11 @@ class UnitSystem(object):
             self._default_units[dimension_str] = min(candidates, key=len)
             
     def get_conversion_factor(self, dimension, unit):
+        """Return the conversion factor from the given unit into 'native' units
+        for a quantity of the given Dimension.
+        For example, if kg is the 'native' unit of mass, then
+        get_conversion_factor(Dimension(M=1), 'g') == 0.001
+        because that's the factor to convert from g to kg"""
         return self._parsers[dimension.str()].flat_units_dictionary[unit]
         
 _unit_system = UnitSystem()
@@ -221,7 +226,6 @@ class PhysicalQuantity(object):
             raise PhysicalQuantityError
         
         _unit_system.register_if_not_there(dimension)
-        self._parser = _unit_system._parsers[dimension.str()]
         self._default_unit_for_printing = _unit_system._default_units[dimension.str()]
 
         self.dimension = dimension
@@ -229,7 +233,7 @@ class PhysicalQuantity(object):
         self._amount_in_basic_units = None
         if value is not None:
             if type(value) == str:
-                self._amount_in_basic_units = self._parser(value)
+                self._amount_in_basic_units = _unit_system._parsers[dimension.str()](value)
             else:
                 if self.dimension != value.dimension:
                     raise IncompatibleUnitsError
@@ -242,7 +246,7 @@ class PhysicalQuantity(object):
         self._amount_in_basic_units = value*_unit_system.get_conversion_factor(self.dimension, unit)
         
     def get_available_units(self):
-        return self._parser.flat_units_dictionary.keys()
+        return _unit_system._parsers[self.dimension.str()].flat_units_dictionary.keys()
     
     def __repr__(self):
         unit = self._default_unit_for_printing
