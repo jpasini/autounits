@@ -15,27 +15,39 @@ class IncompatibleUnitsError(PhysicalQuantityError): pass
 from dimension import Dimension, parse_unit_string
 
 def flatten_dictionary(units_dictionary):
+    """Units dictionaries include synonyms for units, defined in a nested way to avoid repeating,
+    as in this example:
+    
+        d = {('kg', 'kilogram'): 1, ('g', 'gr'): 0.001, 'ton': 1000}
+    The flat version would be  
+        flat_d = {'kg': 1, 'kilogram': 1, 'g': 0.001, 'gr': 0.001, 'ton': 1000}
+        
+    This means there could be a name clash in the keys after flattening. If that's the case, we
+    raise an exception.
+    """
     # Make sure there are no name clashes in the units
     from itertools import chain, ifilter
-    k = units_dictionary.keys()
-    tuples     = list(ifilter(lambda x: type(x) == tuple, k)) # find tuples
-    not_tuples = list(ifilter(lambda x: type(x) != tuple, k))
+    units = units_dictionary.keys()
+    tuples     = list(ifilter(lambda x: type(x) == tuple, units)) # find tuples
+    not_tuples = list(ifilter(lambda x: type(x) != tuple, units))
     flattened_tuples = list(chain(*tuples))
     # join
     rejoined = flattened_tuples + not_tuples
     flattened_keys = set(rejoined)
-    if len(flattened_keys) != len(rejoined):
+    name_clash_detected = (len(flattened_keys) != len(rejoined))
+    if name_clash_detected:
         raise BadUnitDictionaryError
             
     # At this point there are no name clashes, so flatten
-    new_dictionary = dict()
-    for k,v in units_dictionary.iteritems():
-        if type(k) != tuple:
-            new_dictionary[k] = v
+    flattened_dictionary = dict()
+    for unit, conversion_factor in units_dictionary.iteritems():
+        # units may come along or in tuples associated with the same conversion factor
+        if type(unit) != tuple:
+            flattened_dictionary[unit] = conversion_factor
         else:
-            for l in k:
-                new_dictionary[l] = v
-    return new_dictionary
+            for u in unit:
+                flattened_dictionary[u] = conversion_factor
+    return flattened_dictionary
 
 
 from pyparsing import ParseException
