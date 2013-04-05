@@ -14,9 +14,9 @@ class TestAuxiliaryFunctions(unittest.TestCase):
     def test_flatten_good_dictionary(self):
         """Test flattening a units dictionary."""
         from physical_quantities import flatten_dictionary
-        units_dictionary = {('kg', 'kilogram'): 1, ('g', 'gr', 'gram'): 0.001}
+        units_dictionary = {('kg', 'kilogram'): 1, ('g', 'gr', 'gram'): 0.001, 'ton': 1000}
         flat_dictionary = flatten_dictionary(units_dictionary)
-        self.assertEqual(flat_dictionary, {'kg': 1, 'kilogram': 1, 'g': 0.001, 'gr': 0.001, 'gram': 0.001})
+        self.assertEqual(flat_dictionary, {'kg': 1, 'kilogram': 1, 'g': 0.001, 'gr': 0.001, 'gram': 0.001, 'ton': 1000})
 
     def test_flatten_bad_dictionary(self):
         """Flattening a units dictionary with repeats should fail."""
