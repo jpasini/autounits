@@ -205,6 +205,9 @@ class UnitSystem(object):
             # choose basic units (something that gives a conversion of 1) and the shortest representation
             candidates = [k for (k,v) in self._parsers[dimension_str].flat_units_dictionary.iteritems() if v == 1]
             self._default_units[dimension_str] = min(candidates, key=len)
+            
+    def get_conversion_factor(self, dimension, unit):
+        return self._parsers[dimension.str()].flat_units_dictionary[unit]
         
 _unit_system = UnitSystem()
 
@@ -212,15 +215,14 @@ _unit_system = UnitSystem()
 class PhysicalQuantity(object):
     
     def __init__(self, dimension = Dimension(), value = None):
-        """Initialization value may be either a string (to be parsed) or another
-        object of the same dimensions."""
+        """Initialization value may be either a string (to be parsed)
+        or another object of the same dimensions."""
         if type(dimension) != Dimension:
             raise PhysicalQuantityError
         
         _unit_system.register_if_not_there(dimension)
-        dimension_str = dimension.str()
-        self._parser = _unit_system._parsers[dimension_str]
-        self._default_unit_for_printing = _unit_system._default_units[dimension_str]
+        self._parser = _unit_system._parsers[dimension.str()]
+        self._default_unit_for_printing = _unit_system._default_units[dimension.str()]
 
         self.dimension = dimension
         
@@ -234,10 +236,10 @@ class PhysicalQuantity(object):
                 self._amount_in_basic_units = value._amount_in_basic_units
         
     def __getitem__(self, unit):
-        return self._amount_in_basic_units/self._parser.flat_units_dictionary[unit]
+        return self._amount_in_basic_units/_unit_system.get_conversion_factor(self.dimension, unit)
                 
     def __setitem__(self, unit, value):
-        self._amount_in_basic_units = value*self._parser.flat_units_dictionary[unit]
+        self._amount_in_basic_units = value*_unit_system.get_conversion_factor(self.dimension, unit)
         
     def get_available_units(self):
         return self._parser.flat_units_dictionary.keys()
@@ -413,19 +415,19 @@ class Temperature(PhysicalQuantity):
 
     def __getitem__(self, unit):
         if unit == 'C':
-            K = self._amount_in_basic_units/self._parser.flat_units_dictionary['K']
+            K = self._amount_in_basic_units/_unit_system.get_conversion_factor(self._dim, 'K')
             return K - 273.15
         elif unit == 'F':
-            C = self._amount_in_basic_units/self._parser.flat_units_dictionary['K'] - 273.15
+            C = self._amount_in_basic_units/_unit_system.get_conversion_factor(self._dim, 'K') - 273.15
             return C*9/5 + 32
         else:
             return super(Temperature, self).__getitem__(unit)
             
     def __setitem__(self, unit, value):
         if unit == 'C':
-            self._amount_in_basic_units = (value + 273.15)*self._parser.flat_units_dictionary['K'] 
+            self._amount_in_basic_units = (value + 273.15)*_unit_system.get_conversion_factor(self._dim, 'K') 
         elif unit == 'F':
-            self._amount_in_basic_units = ((value - 32)*5/9 + 273.15)/self._parser.flat_units_dictionary['K']
+            self._amount_in_basic_units = ((value - 32)*5/9 + 273.15)/_unit_system.get_conversion_factor(self._dim, 'K')
         else:
             super(Temperature, self).__setitem__(unit, value)
 
@@ -454,17 +456,17 @@ class Energy(PhysicalQuantity):
         
     def __getitem__(self, unit):
         if unit == 'J':
-            return self._amount_in_basic_units/self._parser.flat_units_dictionary['kgm^2/s^2']
+            return self._amount_in_basic_units/_unit_system.get_conversion_factor(self._dim, 'kgm^2/s^2')
         elif unit == 'Btu':
-            return self._amount_in_basic_units/self._parser.flat_units_dictionary['kgm^2/s^2']/self._Btu_2_J
+            return self._amount_in_basic_units/_unit_system.get_conversion_factor(self._dim, 'kgm^2/s^2')/self._Btu_2_J
         else:
             return super(Energy, self).__getitem__(unit)
             
     def __setitem__(self, unit, value):
         if unit == 'J':
-            self._amount_in_basic_units = value*self._parser.flat_units_dictionary['kgm^2/s^2'] 
+            self._amount_in_basic_units = value*_unit_system.get_conversion_factor(self._dim, 'kgm^2/s^2') 
         elif unit == 'Btu':
-            self._amount_in_basic_units = value/self._parser.flat_units_dictionary['kgm^2/s^2']*self._Btu_2_J
+            self._amount_in_basic_units = value/_unit_system.get_conversion_factor(self._dim, 'kgm^2/s^2')*self._Btu_2_J
         else:
             super(Energy, self).__setitem__(unit, value)
 
