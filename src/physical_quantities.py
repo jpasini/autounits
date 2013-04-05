@@ -221,11 +221,11 @@ class PhysicalQuantity(object):
                     raise IncompatibleUnitsError
                 self._amount_in_basic_units = value._amount_in_basic_units
         
-    def __getitem__(self, key):
-        return self._amount_in_basic_units/self._parser.flat_units_dictionary[key]
+    def __getitem__(self, unit):
+        return self._amount_in_basic_units/self._parser.flat_units_dictionary[unit]
                 
-    def __setitem__(self, key, value):
-        self._amount_in_basic_units = value*self._parser.flat_units_dictionary[key]
+    def __setitem__(self, unit, value):
+        self._amount_in_basic_units = value*self._parser.flat_units_dictionary[unit]
         
     def get_available_units(self):
         return self._parser.flat_units_dictionary.keys()
@@ -399,23 +399,23 @@ class Temperature(PhysicalQuantity):
     def __init__(self, value = None):    
         super(Temperature, self).__init__(Temperature._dim, value)        
 
-    def __getitem__(self, key):
-        if key == 'C':
+    def __getitem__(self, unit):
+        if unit == 'C':
             K = self._amount_in_basic_units/self._parser.flat_units_dictionary['K']
             return K - 273.15
-        elif key == 'F':
+        elif unit == 'F':
             C = self._amount_in_basic_units/self._parser.flat_units_dictionary['K'] - 273.15
             return C*9/5 + 32
         else:
-            return super(Temperature, self).__getitem__(key)
+            return super(Temperature, self).__getitem__(unit)
             
-    def __setitem__(self, key, value):
-        if key == 'C':
+    def __setitem__(self, unit, value):
+        if unit == 'C':
             self._amount_in_basic_units = (value + 273.15)*self._parser.flat_units_dictionary['K'] 
-        elif key == 'F':
+        elif unit == 'F':
             self._amount_in_basic_units = ((value - 32)*5/9 + 273.15)/self._parser.flat_units_dictionary['K']
         else:
-            super(Temperature, self).__setitem__(key, value)
+            super(Temperature, self).__setitem__(unit, value)
 
 
 # Some important derived quantities        
@@ -440,21 +440,21 @@ class Energy(PhysicalQuantity):
     def __init__(self, value = None):    
         super(Energy, self).__init__(Energy._dim, value)
         
-    def __getitem__(self, key):
-        if key == 'J':
+    def __getitem__(self, unit):
+        if unit == 'J':
             return self._amount_in_basic_units/self._parser.flat_units_dictionary['kgm^2/s^2']
-        elif key == 'Btu':
+        elif unit == 'Btu':
             return self._amount_in_basic_units/self._parser.flat_units_dictionary['kgm^2/s^2']/self._Btu_2_J
         else:
-            return super(Energy, self).__getitem__(key)
+            return super(Energy, self).__getitem__(unit)
             
-    def __setitem__(self, key, value):
-        if key == 'J':
+    def __setitem__(self, unit, value):
+        if unit == 'J':
             self._amount_in_basic_units = value*self._parser.flat_units_dictionary['kgm^2/s^2'] 
-        elif key == 'Btu':
+        elif unit == 'Btu':
             self._amount_in_basic_units = value/self._parser.flat_units_dictionary['kgm^2/s^2']*self._Btu_2_J
         else:
-            super(Energy, self).__setitem__(key, value)
+            super(Energy, self).__setitem__(unit, value)
 
 
     
