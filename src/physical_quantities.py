@@ -213,6 +213,9 @@ class UnitSystem(object):
         get_conversion_factor(Dimension(M=1), 'g') == 0.001
         because that's the factor to convert from g to kg"""
         return self._parsers[dimension.str()].flat_units_dictionary[unit]
+    
+    def get_available_units(self, dimension):
+        return self._parsers[dimension.str()].flat_units_dictionary.keys()
         
 _unit_system = UnitSystem()
 
@@ -246,7 +249,7 @@ class PhysicalQuantity(object):
         self._amount_in_basic_units = value*_unit_system.get_conversion_factor(self.dimension, unit)
         
     def get_available_units(self):
-        return _unit_system._parsers[self.dimension.str()].flat_units_dictionary.keys()
+        return _unit_system.get_available_units(self.dimension)
     
     def __repr__(self):
         unit = self._default_unit_for_printing
