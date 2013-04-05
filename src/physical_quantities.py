@@ -78,24 +78,30 @@ class PhysicalQuantityStringParser(object):
                 return
 
         
-        pattern = dimension.str(use_braces = True)
         d = {}
         for k,v in primitive_units_dictionaries.iteritems():
             d[k] = flatten_dictionary(v)
         
+        pattern = dimension.str(use_braces = True)
         # go systematically through all primitive unit-set combinations
         from itertools import product        
         p = list(product(d['M'].keys(), d['L'].keys(), d['T'].keys(), d['Q'].keys(), d['Theta'].keys()))
         new_dictionary = {}
         for units in p:
-            # generate the string representing the units (e.g, "m/s^2")
+            # 1. generate the string representing the units (e.g, "m/s^2")
+            # 1a. Generate mapping, such as {'M': 'kg', 'L': 'mile', etc.}
             units_string_dictionary = dict(zip(['M','L','T','Q','Theta'], units))
+            # 1b. Replace the unit in the dimension string: '{M}{L}^2' --> 'kgmile^2'
             unit_string = pattern.format(**units_string_dictionary)
-            # it could be repeated at this stage if the target quantity has only limited dimensions 
+            # the string could be repeated at this stage if the target quantity
+            # has only limited dimensions. For example, if the dimension is ML^2,
+            # we'll get the same string when we cycle over possible units for T
+            if unit_string in new_dictionary.keys(): continue
+            # 2. Find the conversion factor for this specific set of units
+            # 2a. Prepare a dictionary with the conversion factors for this set of units   
             unit_values = [d[k][units_string_dictionary[k]] for k in ['M','L','T','Q','Theta']]
             units_value_dictionary = dict(zip(['M','L','T','Q','Theta'], unit_values))
-            # I need a parser to evaluate this expression
-            if unit_string in new_dictionary.keys(): continue
+            # 2b. Use the Dimension parser to get the conversion factor
             new_dictionary[unit_string] = parse_unit_string(dimension_str, units_value_dictionary)
 
         self.flat_units_dictionary = new_dictionary
