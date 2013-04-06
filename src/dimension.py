@@ -83,8 +83,17 @@ def parse_unit_string(unit_string, units_value_dictionary):
 
 class UnitStringDictionaryParser(object):
     
+    # parsers, indexed by the (sorted) tokens to consider
+    _cached_parsers = {}
+    
     def __init__(self, tokens_to_consider):
+        # Check if I have a cached parser
+        tokens = tuple(sorted(tokens_to_consider))
         tokens_to_consider.append('1')
+        default_exponents = [0]*len(tokens_to_consider)
+        self._default_result = dict(zip(tokens_to_consider, default_exponents))
+        if tokens in self._cached_parsers:
+            self._parser = self._cached_parsers[tokens]
         from pyparsing import Literal, Or, Optional, OneOrMore, stringEnd
         def make_literal(unit_string):
             return Literal(unit_string)
@@ -109,9 +118,8 @@ class UnitStringDictionaryParser(object):
                 return tokens[0].update(tokens[2])
         expression.setParseAction(make_expression_into_dictionary)
         self._parser = expression
+        self._cached_parsers[tokens] = expression
         
-        default_exponents = [0]*len(tokens_to_consider)
-        self._default_result = dict(zip(tokens_to_consider, default_exponents))
         
     def __call__(self, unit_string):
         result = self._default_result
@@ -121,16 +129,16 @@ class UnitStringDictionaryParser(object):
         return result
 
 
-def get_dimension_dictionary_from_string(unit_string):
-    """Parse a string containing units.
+def get_dimension_dictionary_from_string(unit_string, dimensions_considered):
+    """Parse a string containing units and return the corresponding
+    dictionary with the powers:
+    
     For example:
     
-    LT/M^3Q
-    
-    and return the corresponding dictionary with the powers:
-    {'M': -3, L': 1, 'T': 1, 'Q': -1, 'Theta': 0}
+    1        --> {'M':  0, 'L': 0, 'T': 0, 'Q': 0, 'Theta': 0}
+    LT/M^3Q  --> {'M': -3, 'L': 1, 'T': 1, 'Q': -1, 'Theta': 0}
     """
-    return UnitStringDictionaryParser(['M', 'L', 'T', 'Q', 'Theta'])(unit_string)
+    return UnitStringDictionaryParser(dimensions_considered)(unit_string)
 
 
 class Dimension(object):
@@ -154,7 +162,7 @@ class Dimension(object):
                     self.__dict__[k] = d.__dict__[k]
             elif type(d) == str:
                 # extract dimension from string
-                self.__dict__ = get_dimension_dictionary_from_string(d)
+                self.__dict__ = get_dimension_dictionary_from_string(d, self._dimensions_considered)
             else:
                 raise DimensionError
         else: # len(args) == 0, so I should only have named arguments
