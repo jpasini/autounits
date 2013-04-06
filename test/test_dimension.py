@@ -64,6 +64,15 @@ class TestDimension(unittest.TestCase):
         self.assertEqual(d2.Q, 0)
         self.assertEqual(d2.Theta, 0)
         
+    def test_create_from_str(self):
+        """I should be able to recreate a dimension from the output of str."""
+        d1 = Dimension(L = 1, T = -1)
+        d2 = Dimension(str(d1))
+        self.assertEqual(d1, d2)
+        d1 = Dimension(M = 0.5, L = 2, T = -4, Q=2, Theta=1)
+        d2 = Dimension(str(d1))
+        self.assertEqual(d1, d2)
+        
     def test_create_with_bad_input(self):
         """Create dimensions with bad inputs."""
         d1 = Dimension(L = 1, T = -1)
