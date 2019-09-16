@@ -60,7 +60,7 @@ class PhysicalQuantityStringParser(object):
     _parsers = {}
     _flat_unit_dictionaries = {}
     
-    def __init__(self, dimension, primitive_units_dictionaries):
+    def __init__(self, dimension, primitive_units_dictionaries, additional_units_dictionaries = None):
         # Create the dictionary for the dimensions given
         self._is_dimensionless = (dimension == Dimension()) # dimensionless quantities receive special treatment 
         dimension_str = dimension.str()
@@ -74,7 +74,7 @@ class PhysicalQuantityStringParser(object):
             # check: we might have done this case already
             if dimension_str in PhysicalQuantityStringParser._parsers:
                 self.flat_units_dictionary = PhysicalQuantityStringParser._flat_unit_dictionaries[dimension_str]
-                self._dimension = PhysicalQuantityStringParser._parsers[dimension_str]
+                self._parser = PhysicalQuantityStringParser._parsers[dimension_str]
                 return
 
         
@@ -115,17 +115,17 @@ class PhysicalQuantityStringParser(object):
         number.setParseAction(lambda tokens: float(tokens[0]))
         
         if self._is_dimensionless:
-            self._dimension = number + stringEnd
+            self._parser = number + stringEnd
         else:
-            self._dimension = number + units + stringEnd
+            self._parser = number + units + stringEnd
         # add to our stock
         PhysicalQuantityStringParser._flat_unit_dictionaries[dimension_str] = self.flat_units_dictionary 
-        PhysicalQuantityStringParser._parsers[dimension_str] = self._dimension 
+        PhysicalQuantityStringParser._parsers[dimension_str] = self._parser 
         
     def __call__(self, quantity_string):
         """Parse the given string."""
         try:
-            a = self._dimension.parseString(quantity_string)
+            a = self._parser.parseString(quantity_string)
         except ParseException:
             raise BadInputError
         if self._is_dimensionless:
@@ -186,8 +186,10 @@ class UnitSystem(object):
     
     def __init__(self):
         # For caching:
+        self._dimensions_seen = set()
         self._parsers = {}
         self._default_units = {}
+        self._additional_units = {}
         # Conversion constants for primitive quantities
         self._primitive_units = {}
         self._primitive_units['M'] = {('kg', 'kilogram', 'kilograms'): 1, ('g', 'gr', 'gram', 'grams'): 0.001}
@@ -196,21 +198,36 @@ class UnitSystem(object):
         self._primitive_units['Q'] = {('C', 'coulomb'): 1}
         self._primitive_units['Theta'] = {('K', 'kelvin'): 1, ('R', 'rankine'): 5/9}
     
-    def register_if_not_there(self, dimension):
-        """Register this dimension in the unit system if it's not there already."""
+    def register_if_not_there(self, dimension, additional_units_dictionary = None):
+        """Register this dimension in the unit system if it's not there already.
+        If provided, also register any additional units provided. These would be in the 
+        form of a dictionary with conversion factors to the 'native' units."""
         if type(dimension) != Dimension:
             raise PhysicalQuantityError
         
         # create the parser if it doesn't exist already. Index by string representation
         dimension_str = dimension.str()
+        self._dimensions_seen.add(dimension_str)
         if dimension_str not in self._parsers:
-            self._parsers[dimension_str] = PhysicalQuantityStringParser(dimension, self._primitive_units)
+            self._parsers[dimension_str] = PhysicalQuantityStringParser(dimension, self._primitive_units, self._additional_units)
+        
+        if additional_units_dictionary is not None and dimension_str not in self._additional_units:
+            self._additional_units[dimension_str] = additional_units_dictionary
+            # At this point, since I'm adding units, I should regenerate all parsers
+            self.generate_all_parsers()
             
         # choose default units for printing and store if they're not stored already 
         if dimension_str not in self._default_units:
             # choose basic units (something that gives a conversion of 1) and the shortest representation
             candidates = [k for (k,v) in self._parsers[dimension_str].flat_units_dictionary.iteritems() if v == 1]
             self._default_units[dimension_str] = min(candidates, key=len)
+            
+    def generate_all_parsers(self):
+        """Given the current dimensions we've seen, [re]generate all parsers.
+        This would be useful when several "additional units" have been added."""
+        for dimension_str in self._dimensions_seen:
+            dim = Dimension(dimension_str)
+            self._parsers[dimension_str] = PhysicalQuantityStringParser(dim, self._primitive_units, self._additional_units)
             
     def get_conversion_factor(self, dimension, unit):
         """Return the conversion factor from the given unit into 'native' units
@@ -228,13 +245,13 @@ _unit_system = UnitSystem()
 @total_ordering
 class PhysicalQuantity(object):
     
-    def __init__(self, dimension = Dimension(), value = None):
+    def __init__(self, dimension = Dimension(), value = None, additional_units_dictionary = None):
         """Initialization value may be either a string (to be parsed)
         or another object of the same dimensions."""
         if type(dimension) != Dimension:
             raise PhysicalQuantityError
         
-        _unit_system.register_if_not_there(dimension)
+        _unit_system.register_if_not_there(dimension, additional_units_dictionary)
         self._default_unit_for_printing = _unit_system._default_units[dimension.str()]
 
         self.dimension = dimension
@@ -463,9 +480,10 @@ class Energy(PhysicalQuantity):
     
     _dim = Dimension(M = 1, L = 2, T = -2)
     _Btu_2_J = 1055.05585
+    _additional_units = {'J': 1, 'Btu': 1055.05585}
     
     def __init__(self, value = None):    
-        super(Energy, self).__init__(Energy._dim, value)
+        super(Energy, self).__init__(Energy._dim, value, additional_units_dictionary = Energy._additional_units)
         
     def __getitem__(self, unit):
         if unit == 'J':
