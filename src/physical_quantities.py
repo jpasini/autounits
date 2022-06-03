@@ -16,10 +16,10 @@ from dimension import Dimension, parse_unit_string
 
 def flatten_dictionary(units_dictionary):
     # Make sure there are no name clashes in the units
-    from itertools import chain, ifilter
+    from itertools import chain
     k = units_dictionary.keys()
-    tuples     = list(ifilter(lambda x: type(x) == tuple, k)) # find tuples
-    not_tuples = list(ifilter(lambda x: type(x) != tuple, k))
+    tuples     = list(filter(lambda x: type(x) == tuple, k)) # find tuples
+    not_tuples = list(filter(lambda x: type(x) != tuple, k))
     flattened_tuples = list(chain(*tuples))
     # join
     rejoined = flattened_tuples + not_tuples
@@ -29,7 +29,7 @@ def flatten_dictionary(units_dictionary):
             
     # At this point there are no name clashes, so flatten
     new_dictionary = dict()
-    for k,v in units_dictionary.iteritems():
+    for k,v in units_dictionary.items():
         if type(k) != tuple:
             new_dictionary[k] = v
         else:
@@ -68,7 +68,7 @@ class PhysicalQuantityStringParser(object):
         
         pattern = dimension.str(use_braces = True)
         d = {}
-        for k,v in primitive_units_dictionaries.iteritems():
+        for k,v in primitive_units_dictionaries.items():
             d[k] = flatten_dictionary(v)
         
         # go systematically through all primitive unit-set combinations
@@ -90,7 +90,7 @@ class PhysicalQuantityStringParser(object):
         
         def make_literal(unit_string, val):
             return Literal(unit_string).setParseAction(replaceWith(val))
-        units = Or( [ make_literal(s,v) for s,v in new_dictionary.iteritems() ] )
+        units = Or( [ make_literal(s,v) for s,v in new_dictionary.items() ] )
         
         from pyparsing import Regex
         number = Regex(r'\d+(\.\d*)?([eE][+-]?\d+)?')
@@ -162,7 +162,7 @@ class PhysicalQuantity(object):
         # choose default units for printing and store if they're not stored already 
         if dimension_str not in PhysicalQuantity._default_units:
             # choose basic units (something that gives a conversion of 1) and the shortest representation
-            candidates = [k for (k,v) in self._parser.flat_units_dictionary.iteritems() if v == 1]
+            candidates = [k for (k,v) in self._parser.flat_units_dictionary.items() if v == 1]
             PhysicalQuantity._default_units[dimension_str] = min(candidates, key=len)
         self._default_unit_for_printing = PhysicalQuantity._default_units[dimension_str]
         

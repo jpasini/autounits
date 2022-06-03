@@ -4,6 +4,7 @@ Library of physical dimensions.
 """
 
 from __future__ import division
+from functools import reduce
 
 class DimensionError(Exception): pass
 class IncompatibleDimensionsError(DimensionError): pass
@@ -151,7 +152,7 @@ def get_units_literals(units_value_dictionary):
     def make_literal(unit_string, val):
         return Literal(unit_string).setParseAction(replaceWith(val))
     units_value_dictionary["1"] = 1 # add one more term for dimensionless quantities
-    return Or([make_literal(s, v) for (s, v) in units_value_dictionary.iteritems()])
+    return Or([make_literal(s, v) for (s, v) in units_value_dictionary.items()])
 
 def get_term(units_value_dictionary):
     from pyparsing import Optional
@@ -202,7 +203,7 @@ def parse_unit_string(unit_string, units_value_dictionary):
     from units_value_dictionary, which contains, for example
     {'L': 1, 'M': 1, 'T': 60, 'Q': 1, 'Theta': 1}
     """
-    combo = unit_string, tuple((k, v) for k,v in units_value_dictionary.iteritems())
+    combo = unit_string, tuple((k, v) for k,v in units_value_dictionary.items())
     if combo not in cached_unit_string_parsers:
         cached_unit_string_parsers[combo] = get_expression(units_value_dictionary)
     return cached_unit_string_parsers[combo].parseString(unit_string)[0]

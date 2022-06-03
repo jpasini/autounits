@@ -5,7 +5,7 @@ from physical_quantities import Distance, Speed
 def print_table_row(speed, distances):
     '''Print mph and pace for 1 mile, 5k, 10k, half, and full marathon.'''
     paces = [speed.pace(x).str for x in distances]
-    print '{0:.1f} & {1} & {2} & {3} & {4} & {5} \\\\'.format(speed['mi/hr'], *paces)
+    print('{0:.1f} & {1} & {2} & {3} & {4} & {5} \\\\'.format(speed['mi/hr'], *paces))
     
 def print_table():
     distances_str = ['1 mile','5 km','10 km','0.5 marathon','1 marathon']
@@ -18,7 +18,7 @@ def print_table():
     
     
 def print_latex_header():
-    print '''
+    print('''
 \\documentclass[11pt]{article}
 \\usepackage{amsmath}
 \\usepackage{fullpage}
@@ -30,14 +30,14 @@ def print_latex_header():
 \\begin{center}
 \\begin{tabular}{rrrrrr}
 \\toprule
-\\multicolumn{1}{c}{mph} & \\multicolumn{1}{c}{1mi} & \\multicolumn{1}{c}{5k} & \\multicolumn{1}{c}{10k} & \\multicolumn{1}{c}{half} & \\multicolumn{1}{c}{full} \\\\ \\midrule'''
+\\multicolumn{1}{c}{mph} & \\multicolumn{1}{c}{1mi} & \\multicolumn{1}{c}{5k} & \\multicolumn{1}{c}{10k} & \\multicolumn{1}{c}{half} & \\multicolumn{1}{c}{full} \\\\ \\midrule''')
 
 def print_latex_footer():
-    print '''\\bottomrule
+    print('''\\bottomrule
 \\end{tabular}
 \\end{center}
 \\end{Large}
-\\end{document}'''
+\\end{document}''')
     
 if __name__ == "__main__":
     print_latex_header()
