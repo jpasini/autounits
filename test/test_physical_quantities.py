@@ -158,7 +158,7 @@ class TestMass(unittest.TestCase):
     def test_create_simple_masses(self):
         """Simple masses."""
         # Check consistency
-        for unit,kilograms in self.kilograms_in.iteritems():
+        for unit,kilograms in self.kilograms_in.items():
             m = Mass('1' + unit) # create "1x" where x is the unit
             self.assertEqual(m['kg'], kilograms) # the kilograms should be correct
         # Check creating from other distances
@@ -220,7 +220,7 @@ class TestDistance(unittest.TestCase):
     def test_create_simple_distances(self):
         """Simple distances."""
         # Check consistency
-        for unit,meters in self.meters_in.iteritems():
+        for unit,meters in self.meters_in.items():
             d = Distance('1' + unit) # create "1x" where x is the unit
             self.assertEqual(d['m'], meters) # the meters should be correct
         # Check creating from other distances
@@ -280,7 +280,7 @@ class TestTime(unittest.TestCase):
         
     def test_create_simple_times(self):
         """Simple times."""
-        for unit,seconds in self.seconds_in.iteritems():
+        for unit,seconds in self.seconds_in.items():
             t = Time('1' + unit) # create "1x" where x is the unit
             self.assertEqual(t['s'], seconds) # the seconds should be correct
             
@@ -321,7 +321,7 @@ class TestTemperature(unittest.TestCase):
         
     def test_create_simple_temperatures(self):
         """Simple temperatures."""
-        for unit,kelvins in self.kelvins_in.iteritems():
+        for unit,kelvins in self.kelvins_in.items():
             t = Temperature('1' + unit) # create "1x" where x is the unit
             self.assertEqual(t['K'], kelvins)
             
