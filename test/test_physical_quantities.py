@@ -1,26 +1,16 @@
 from __future__ import division
 
-import unittest
 import sys
+import unittest
+
+from dimension import Dimension
+from physical_quantities import (BadInputError, BadUnitDictionaryError, Charge,
+                                 Dimensionless, Distance, Energy,
+                                 IncompatibleUnitsError, Mass,
+                                 PhysicalQuantity, PhysicalQuantityFactory,
+                                 Speed, Temperature, Time)
 
 sys.path.append("../src")
-from physical_quantities import (
-    PhysicalQuantity,
-    Dimensionless,
-    Mass,
-    Distance,
-    Time,
-    Charge,
-    Temperature,
-)
-from physical_quantities import Speed, Energy
-from physical_quantities import PhysicalQuantityFactory
-from physical_quantities import (
-    BadInputError,
-    BadUnitDictionaryError,
-    IncompatibleUnitsError,
-)
-from dimension import Dimension
 
 
 class TestAuxiliaryFunctions(unittest.TestCase):

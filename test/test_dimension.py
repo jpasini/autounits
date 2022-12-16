@@ -1,11 +1,12 @@
 from __future__ import division
 
-import unittest
 import sys
+import unittest
+
+from dimension import (Dimension, DimensionError, IncompatibleDimensionsError,
+                       parse_unit_string)
 
 sys.path.append("../src")
-from dimension import Dimension, parse_unit_string
-from dimension import DimensionError, IncompatibleDimensionsError
 
 
 class TestDimension(unittest.TestCase):

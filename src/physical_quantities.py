@@ -5,10 +5,10 @@ Library of physical quantities, with automatic unit conversion.
 
 from __future__ import division
 
-from numbers import Number
 from functools import total_ordering
-from pyparsing import ParseException
-from pyparsing import Literal, replaceWith, Or, stringEnd
+from numbers import Number
+
+from pyparsing import Literal, Or, ParseException, replaceWith, stringEnd
 
 from dimension import Dimension, parse_unit_string
 
