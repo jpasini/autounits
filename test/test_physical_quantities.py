@@ -4,11 +4,21 @@ import sys
 import unittest
 
 from dimension import Dimension
-from physical_quantities import (BadInputError, BadUnitDictionaryError, Charge,
-                                 Dimensionless, Distance, Energy,
-                                 IncompatibleUnitsError, Mass,
-                                 PhysicalQuantity, PhysicalQuantityFactory,
-                                 Speed, Temperature, Time)
+from physical_quantities import (
+    BadInputError,
+    BadUnitDictionaryError,
+    Charge,
+    Dimensionless,
+    Distance,
+    Energy,
+    IncompatibleUnitsError,
+    Mass,
+    PhysicalQuantity,
+    PhysicalQuantityFactory,
+    Speed,
+    Temperature,
+    Time,
+)
 
 sys.path.append("../src")
 
