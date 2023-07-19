@@ -15,7 +15,7 @@ There are two main classes:
 
 For example,
 
-```
+```python
 d = Dimension(L = 2, T = -1) # a dimension of area per unit time
 p = PhysicalQuantity(d, "3m^2/s")
 print(p['km^2/s']) # 3e-6
@@ -28,5 +28,17 @@ print(p['km^2/s']) # 3e-6
 ## Design 2 (conform to popular interfaces)
 
 The idea is to look at widely-used interfaces, like numpy, pandas, scikit-learn, and make sure they can be used seamlessly.
+
+### Questions:
+
+Say we have a regressor from scikit-learn and we have two numpy.array-like objects that are physical quantities that the regressor is able to consume during training, will the outputs _still_ be physical quantities? Let's say we want to estimate the spring constant `k` in `F=-kx`. We have an array `F` with _force_ dimensions and an array `x` of distance. Will `k` have dimensions of force/distance? Given `x`, will predictions from the model have dimensions of force?
+
+To make this concrete:
+
+```python
+from sklearn.linear_model import LinearRegression
+model = LinearRegression()
+# need to complete the example
+```
 
 ## Design 3 (?)
