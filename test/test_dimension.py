@@ -3,12 +3,8 @@ from __future__ import division
 import sys
 import unittest
 
-from dimension import (
-    Dimension,
-    DimensionError,
-    IncompatibleDimensionsError,
-    parse_unit_string,
-)
+from dimension import (Dimension, DimensionError, IncompatibleDimensionsError,
+                       parse_unit_string)
 
 sys.path.append("../src")
 
