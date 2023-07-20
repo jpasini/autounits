@@ -29,6 +29,15 @@ print(p['km^2/s']) # 3e-6
 
 The idea is to look at widely-used interfaces, like numpy, pandas, scikit-learn, and make sure they can be used seamlessly.
 
+It seems `scimath` has defined units for working with scalars and arrays [using decorators](http://docs.enthought.com/scimath/units/unit_numpy.html). I should study this: perhaps it does everything I need.
+
+See also:
+
+* [UnitScalar](http://docs.enthought.com/scimath/units/user_ref.html#scimath.units.unit_scalar.UnitScalar)
+* [UnitArray](http://docs.enthought.com/scimath/units/user_ref.html#scimath.units.unit_scalar.UnitArray)
+* [Unitted functions](http://docs.enthought.com/scimath/units/unit_funcs.html#unit-funcs). I'm not a fan of unitted functions doing unit conversions. I prefer that they return a physical quantity, and we choose the units afterward.
+* I do like the approach of [using units explicitly](http://docs.enthought.com/scimath/units/intro.html) to give dimensions to quantities, as they _should_ be specified when first created. E.g., having `cm` be a defined object, so `x = 3*cm` makes `x` a distance and gives a default unit for display.
+
 ### Questions:
 
 Say we have a regressor from scikit-learn and we have two numpy.array-like objects that are physical quantities that the regressor is able to consume during training, will the outputs _still_ be physical quantities? Let's say we want to estimate the spring constant `k` in `F=-kx`. We have an array `F` with _force_ dimensions and an array `x` of distance. Will `k` have dimensions of force/distance? Given `x`, will predictions from the model have dimensions of force?
