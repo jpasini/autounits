@@ -4,25 +4,17 @@ import sys
 import unittest
 
 from dimension import Dimension
-from physical_quantities import (
-    BadInputError,
-    BadUnitDictionaryError,
-    Charge,
-    Dimensionless,
-    Distance,
-    Energy,
-    IncompatibleUnitsError,
-    Mass,
-    PhysicalQuantity,
-    PhysicalQuantityFactory,
-    Speed,
-    Temperature,
-    Time,
-)
+from physical_quantities import (BadInputError, BadUnitDictionaryError, Charge,
+                                 Dimensionless, Distance, Energy,
+                                 IncompatibleUnitsError, Mass,
+                                 PhysicalQuantity, PhysicalQuantityFactory,
+                                 Speed, Temperature, Time)
 
 sys.path.append("../src")
 
 
+# I'm testing for implementation internals: should separate from user-facing
+# interface behavior tests.
 class TestAuxiliaryFunctions(unittest.TestCase):
     def test_flatten_good_dictionary(self):
         """Test flattening a units dictionary."""
