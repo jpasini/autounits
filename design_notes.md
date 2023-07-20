@@ -37,6 +37,7 @@ See also:
 * [UnitArray](http://docs.enthought.com/scimath/units/user_ref.html#scimath.units.unit_scalar.UnitArray)
 * [Unitted functions](http://docs.enthought.com/scimath/units/unit_funcs.html#unit-funcs). I'm not a fan of unitted functions doing unit conversions. I prefer that they return a physical quantity, and we choose the units afterward.
 * I do like the approach of [using units explicitly](http://docs.enthought.com/scimath/units/intro.html) to give dimensions to quantities, as they _should_ be specified when first created. E.g., having `cm` be a defined object, so `x = 3*cm` makes `x` a distance and gives a default unit for display.
+* I should try to use `sklearn` algorithms with these objects, to see if (a) they work and (b) they retain the units after being processed into derived quantities.
 
 ### Questions:
 
