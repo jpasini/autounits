@@ -135,6 +135,11 @@ class TestDimension(unittest.TestCase):
             Dimension(M=-2, L=1, T=-0.5).str(use_braces=True), "{L}/{M}^2{T}^0.5"
         )
 
+    # These next tests seem to only deal with internals. Since they're not
+    # hidden, they've become part of the interface, exposing some of the
+    # implementationn. I should have the tests moved elsewhere, perhaps in the
+    # implementation file itself?
+
     def test_parsing_elements(self):
         from dimension import get_number
         from pyparsing import ParseException
@@ -222,6 +227,8 @@ class TestDimension(unittest.TestCase):
             parse_unit_string(Dimension(M=-2, L=1, T=-0.5).str(), unit_values),
             3 / 4 / 2,
         )
+
+    # These tests are for actual behavior.
 
     def test_for_equality(self):
         """Equality is based on dimension content."""
