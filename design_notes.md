@@ -23,7 +23,8 @@ print(p['km^2/s']) # 3e-6
 
 ### Questions:
 
-* How to deal with arrays of physical quantities?
+* How to deal with _arrays_ of physical quantities?
+* Is using square brackets a bad idea? Will it interfere with list/tuple indexing `l[i]` or dict element access `d['key']`?
 
 ## Design 2 (conform to popular interfaces)
 
