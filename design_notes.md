@@ -56,4 +56,9 @@ model = LinearRegression()
 # need to complete the example
 ```
 
-## Design 3 (?)
+## Design 3 (Separate System of Units class)
+
+In the `feature/betterinput` branch I started developing this idea that the PhysicalQuantity class was doing too much and starting to become a Frankenclass. The concept here is to separate the class that holds the quantity (dimension and magnitude) from the set of units, including derived units, that could be used to express a physical quantity.
+
+This is mostly about internal implementation, but for the design discussion I want to understand first how this may change (improve?) the interface. On the other hand, it could be best if this does not have a visible impact on the interface, and just becomes a natural way of implementing it.
+
