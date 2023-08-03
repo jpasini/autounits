@@ -22,3 +22,12 @@ p = PhysicalQuantity(d, "3m^2/s")
 print(p['km^2/s']) # 3e-6
 ```
 
+## Other tools
+
+For use with `vim`:
+
+* `ale`
+* `ale` fixers:`black` and `isort` for automatic code format fixers
+* `ale` linter: `flake8`
+* `mypy`: static code checker with type inference. Need to add type hints to help.
+
